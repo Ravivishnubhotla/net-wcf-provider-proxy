@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCFProviderProxy.Host", "WC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Web", "Sample.Web\Sample.Web.csproj", "{BB51B2E9-AFA8-47DB-ACD0-1DB914A72B19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Host", "Sample.Host\Sample.Host.csproj", "{88E29E3D-402B-4D7E-81AB-15740C05F7A0}"
-EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -53,16 +51,6 @@ Global
 		{BB51B2E9-AFA8-47DB-ACD0-1DB914A72B19}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{BB51B2E9-AFA8-47DB-ACD0-1DB914A72B19}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BB51B2E9-AFA8-47DB-ACD0-1DB914A72B19}.Release|x86.ActiveCfg = Release|Any CPU
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Debug|x86.ActiveCfg = Debug|x86
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Debug|x86.Build.0 = Debug|x86
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Release|Any CPU.ActiveCfg = Release|x86
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Release|Mixed Platforms.Build.0 = Release|x86
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Release|x86.ActiveCfg = Release|x86
-		{88E29E3D-402B-4D7E-81AB-15740C05F7A0}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
