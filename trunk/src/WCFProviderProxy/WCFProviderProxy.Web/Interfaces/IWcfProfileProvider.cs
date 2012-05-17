@@ -12,7 +12,7 @@ namespace WCFProviderProxy.Interfaces
     public interface IWcfProfileProvider
     {
         [OperationContract]
-        void SetMembershipProvider(string ProviderName);
+        void SetProvider(string ProviderName);
 
         string ApplicationName { [OperationContract] get; [OperationContract] set; }
 

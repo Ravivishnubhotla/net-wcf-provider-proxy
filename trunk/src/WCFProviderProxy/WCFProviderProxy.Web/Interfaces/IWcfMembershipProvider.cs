@@ -11,7 +11,7 @@ namespace WCFProviderProxy.Interfaces
     public interface IWcfMembershipProvider
     {
         [OperationContract]
-        void SetMembershipProvider(string ProviderName);
+        void SetProvider(string ProviderName);
 
         string ApplicationName { [OperationContract] get; [OperationContract] set; }
 

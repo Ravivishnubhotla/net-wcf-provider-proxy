@@ -9,7 +9,7 @@ using WCFProviderProxy.Interfaces;
 
 namespace WCFProviderProxy.Host
 {
-    public class ProxyRoleProvider : RoleProvider, IWcfRoleProvider
+    public partial class ProxyRoleProvider : RoleProvider, IWcfRoleProvider
     {
         private static readonly ServiceHost serviceHost = new ServiceHost(typeof(ProxyRoleProvider));
 
@@ -18,26 +18,48 @@ namespace WCFProviderProxy.Host
 
         public static void OpenServiceHost()
         {
-            serviceHost.Open();
-            return;
+            try
+            {
+                serviceHost.Open();
+            }
+            catch (Exception ex)
+            {
+                OnError(typeof(ProxyProfileProvider), ex);
+            }
         }
 
         public static void CloseServiceHost()
         {
-            serviceHost.Close();
-            return;
+            try
+            {
+                if (serviceHost.State == CommunicationState.Opened)
+                {
+                    serviceHost.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(typeof(ProxyProfileProvider), ex, false);
+            }
         }
 
-
-        public void SetMembershipProvider(string ProviderName)
+        public void SetProvider(string ProviderName)
         {
-            if (String.IsNullOrWhiteSpace(ProviderName))
+            try
             {
-                InternalProvider = Roles.Provider;
+                if (String.IsNullOrWhiteSpace(ProviderName))
+                {
+                    InternalProvider = Roles.Provider;
+                }
+                else
+                {
+                    InternalProvider = Roles.Providers[ProviderName];
+                }
             }
-            else
+            catch (Exception ex)
             {
-                InternalProvider = Roles.Providers[ProviderName];
+                OnError(this, ex);
+                InternalProvider = Roles.Provider;
             }
         }
 
@@ -46,74 +68,189 @@ namespace WCFProviderProxy.Host
 
         public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
         {
-            if (config == null)
-                throw new ArgumentNullException("config");
-
-            if (!String.IsNullOrWhiteSpace(config["applicationName"]))
+            try
             {
-                ApplicationName = config["applicationName"];
-            }
+                if (config == null)
+                    throw new ArgumentNullException("config");
 
-            if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+                if (!String.IsNullOrWhiteSpace(config["applicationName"]))
+                {
+                    ApplicationName = config["applicationName"];
+                }
+
+                if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+                {
+                    SetProvider(config["proxyProviderName"]);
+                }
+
+                // Initialize the abstract base class.
+                base.Initialize(name, config);
+            }
+            catch (Exception ex)
             {
-                InternalProvider = Roles.Providers[config["proxyProviderName"]];
+                OnError(this, ex);
             }
-
-            // Initialize the abstract base class.
-            base.Initialize(name, config);
         }
 
         public override void AddUsersToRoles(string[] usernames, string[] roleNames)
         {
-            InternalProvider.AddUsersToRoles(usernames, roleNames);
+            try
+            {
+                InternalProvider.AddUsersToRoles(usernames, roleNames);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
+            }
+
             return;
         }
 
         public override void CreateRole(string roleName)
         {
-            InternalProvider.CreateRole(roleName);
+            try
+            {
+                InternalProvider.CreateRole(roleName);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
+            }
+
             return;
         }
 
         public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)
         {
-            return InternalProvider.DeleteRole(roleName, throwOnPopulatedRole);
+            bool output = false;
+
+            try
+            {
+                output = InternalProvider.DeleteRole(roleName, throwOnPopulatedRole);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, throwOnPopulatedRole);
+                output = false;
+            }
+
+            return output;
         }
 
         public override string[] FindUsersInRole(string roleName, string usernameToMatch)
         {
-            return InternalProvider.FindUsersInRole(roleName, usernameToMatch);
+            string[] output = null;
+
+            try
+            {
+                output = InternalProvider.FindUsersInRole(roleName, usernameToMatch);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = new string[] { };
+            }
+
+            return output;
         }
 
         public override string[] GetAllRoles()
         {
-            return InternalProvider.GetAllRoles();
+            string[] output = null;
+
+            try
+            {
+                output = InternalProvider.GetAllRoles();
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = new string[] { };
+            }
+
+            return output;
         }
 
         public override string[] GetRolesForUser(string username)
         {
-            return InternalProvider.GetRolesForUser(username);
+            string[] output = null;
+
+            try
+            {
+                output = InternalProvider.GetRolesForUser(username);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = new string[] { };
+            }
+
+            return output;
         }
 
         public override string[] GetUsersInRole(string roleName)
         {
-            return InternalProvider.GetUsersInRole(roleName);
+            string[] output = null;
+
+            try
+            {
+                output = InternalProvider.GetUsersInRole(roleName);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = new string[] { };
+            }
+
+            return output;
         }
 
         public override bool IsUserInRole(string username, string roleName)
         {
-            return InternalProvider.IsUserInRole(username, roleName);
+            bool output = false;
+
+            try
+            {
+                output = InternalProvider.IsUserInRole(username, roleName);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = false;
+            }
+
+            return output;
         }
 
         public override void RemoveUsersFromRoles(string[] usernames, string[] roleNames)
         {
-            InternalProvider.RemoveUsersFromRoles(usernames, roleNames);
+            try
+            {
+                InternalProvider.RemoveUsersFromRoles(usernames, roleNames);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
+            }
+            
             return;
         }
 
         public override bool RoleExists(string roleName)
         {
-            return InternalProvider.RoleExists(roleName);
+            bool output = false;
+
+            try
+            {
+                output = InternalProvider.RoleExists(roleName);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = false;
+            }
+
+            return output;
         }
     }
 }
