@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ServiceModel;
 using System.Linq;
 using System.Text;
+using System.ServiceModel;
 using System.Web.Configuration;
 using System.Web.Security;
 using WCFProviderProxy.Interfaces;
 
 namespace WCFProviderProxy.Host
 {
-    public class ProxyMembershipProvider : MembershipProvider, IWcfMembershipProvider 
+    public partial class ProxyMembershipProvider : MembershipProvider, IWcfMembershipProvider 
     {
         private static readonly MembershipSection membershipSection = new MembershipSection();
         private static readonly ServiceHost serviceHost = new ServiceHost(typeof(ProxyMembershipProvider));
@@ -19,25 +19,48 @@ namespace WCFProviderProxy.Host
 
         public static void OpenServiceHost()
         {
-            serviceHost.Open();
-            return;
+            try
+            {
+                serviceHost.Open();
+            }
+            catch (Exception ex)
+            {
+                OnError(typeof(ProxyMembershipProvider), ex);
+            }
         }
 
         public static void CloseServiceHost()
         {
-            serviceHost.Close();
-            return;
+            try
+            {
+                if (serviceHost.State == CommunicationState.Opened)
+                {
+                    serviceHost.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(typeof(ProxyMembershipProvider), ex);
+            }
         }
 
-        public void SetMembershipProvider(string ProviderName)
+        public void SetProvider(string ProviderName)
         {
-            if (String.IsNullOrWhiteSpace(ProviderName))
+            try
             {
-                InternalProvider = Membership.Provider;
+                if (String.IsNullOrWhiteSpace(ProviderName))
+                {
+                    InternalProvider = Membership.Provider;
+                }
+                else
+                {
+                    InternalProvider = Membership.Providers[ProviderName];
+                }
             }
-            else
+            catch (Exception ex)
             {
-                InternalProvider = Membership.Providers[ProviderName];
+                OnError(this, ex);
+                InternalProvider = Membership.Provider;
             }
         }
 
@@ -46,48 +69,116 @@ namespace WCFProviderProxy.Host
 
         public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
         {
-            if (config == null)
-                throw new ArgumentNullException("config");
-
-            if (!String.IsNullOrWhiteSpace(config["applicationName"]))
+            try
             {
-                ApplicationName =config["applicationName"];
-            }
+                if (config == null)
+                    throw new ArgumentNullException("config");
 
-            if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+                if (!String.IsNullOrWhiteSpace(config["applicationName"]))
+                {
+                    ApplicationName = config["applicationName"];
+                }
+
+                if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+                {
+                    SetProvider(config["proxyProviderName"]);
+                }
+
+                // Initialize the abstract base class.
+                base.Initialize(name, config);
+            }
+            catch (Exception ex)
             {
-                InternalProvider = Membership.Providers[config["proxyProviderName"]];
+                OnError(this, ex);
             }
-
-            // Initialize the abstract base class.
-            base.Initialize(name, config);
         }
 
         public override bool ChangePassword(string username, string oldPassword, string newPassword)
         {
-            return InternalProvider.ChangePassword(username, oldPassword, newPassword);
+            bool output = false;
+
+            try
+            {
+                output = InternalProvider.ChangePassword(username, oldPassword, newPassword);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = false;
+            }
+
+            return output;
         }
         
         public override bool ChangePasswordQuestionAndAnswer(string username, string password, string newPasswordQuestion, string newPasswordAnswer)
         {
-            return InternalProvider.ChangePasswordQuestionAndAnswer(username, password, newPasswordQuestion, newPasswordAnswer);
+            bool output = false;
+
+            try
+            {
+                output = InternalProvider.ChangePasswordQuestionAndAnswer(username, password, newPasswordQuestion, newPasswordAnswer);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = false;
+            }
+
+            return output;
         }
 
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
-            return InternalProvider.CreateUser(username, password, email, passwordQuestion, passwordAnswer, isApproved, providerUserKey, out status);
+            MembershipUser output = null;
+
+            try
+            {
+                output = InternalProvider.CreateUser(username, password, email, passwordQuestion, passwordAnswer, isApproved, providerUserKey, out status);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+                status = MembershipCreateStatus.ProviderError;
+            }
+
+            return output;
         }
 
         public override bool DeleteUser(string username, bool deleteAllRelatedData)
         {
-            return InternalProvider.DeleteUser(username, deleteAllRelatedData);
+            bool output = false;
+
+            try
+            {
+                output = InternalProvider.DeleteUser(username, deleteAllRelatedData);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = false;
+            }
+
+            return output;
         }
 
         public override bool EnablePasswordReset
         {
             get
             {
-                return InternalProvider.EnablePasswordReset;
+                bool output = false;
+
+                try
+                {
+                    output = InternalProvider.EnablePasswordReset;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                    output = false;
+                }
+
+                return output;
             }
         }
 
@@ -95,91 +186,239 @@ namespace WCFProviderProxy.Host
         {
             get
             {
-                return InternalProvider.EnablePasswordRetrieval;
+                bool output = false;
+
+                try
+                {
+                    output = InternalProvider.EnablePasswordRetrieval;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                    output = false;
+                }
+
+                return output;
             }
         }
 
         public List<MembershipUser> ListUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
-            List<MembershipUser> users = new List<MembershipUser>();
+            List<MembershipUser> output = new List<MembershipUser>();
 
-            foreach (MembershipUser user in InternalProvider.FindUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords))
+            try
             {
-                users.Add(user);
+                foreach (MembershipUser user in InternalProvider.FindUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(user);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output.Clear();
+                totalRecords = 0;
             }
 
-            return users;
+            return output;
         }
 
         public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
-            return InternalProvider.FindUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords);
+            MembershipUserCollection output = null;
+            try
+            {
+                output = InternalProvider.FindUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+                totalRecords = 0;
+            }
+
+            return output;
         }
 
         public List<MembershipUser> ListUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
-            List<MembershipUser> users = new List<MembershipUser>();
+            List<MembershipUser> output = new List<MembershipUser>();
 
-            foreach (MembershipUser user in InternalProvider.FindUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords))
+            try
             {
-                users.Add(user);
+                foreach (MembershipUser user in InternalProvider.FindUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(user);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output.Clear();
+                totalRecords = 0;
             }
 
-            return users;
+            return output;
         }
 
         public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
-            return InternalProvider.FindUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords);
+            MembershipUserCollection output = null;
+         
+            try
+            {
+                output = InternalProvider.FindUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+                totalRecords = 0;
+            }
+
+            return output;
         }
 
         public List<MembershipUser> ListAllUsers(int pageIndex, int pageSize, out int totalRecords)
         {
-            List<MembershipUser> users = new List<MembershipUser>();
+            List<MembershipUser> output = new List<MembershipUser>();
 
-            foreach (MembershipUser user in InternalProvider.GetAllUsers(pageIndex, pageSize, out totalRecords))
+            try
             {
-                users.Add(user);
+                foreach (MembershipUser user in InternalProvider.GetAllUsers(pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(user);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output.Clear();
+                totalRecords = 0;
             }
 
-            return users;
+            return output;
         }
 
         public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
         {
-            return InternalProvider.GetAllUsers(pageIndex, pageSize, out totalRecords);
+            MembershipUserCollection output = null;
+         
+            try
+            {
+                output = InternalProvider.GetAllUsers(pageIndex, pageSize, out totalRecords);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+                totalRecords = 0;
+            }
+
+            return output;
         }
 
         public override int GetNumberOfUsersOnline()
         {
-            return InternalProvider.GetNumberOfUsersOnline();
+            int output = 0;
+
+            try
+            {
+                output = InternalProvider.GetNumberOfUsersOnline();
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = 0;
+            }
+
+            return output;
         }
 
         public override string GetPassword(string username, string answer)
         {
-            return InternalProvider.GetPassword(username, answer);
+            string output = null;
+
+            try
+            {
+                output = InternalProvider.GetPassword(username, answer);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+            }
+
+            return output;
         }
 
         public override MembershipUser GetUser(string username, bool userIsOnline)
         {
-            return InternalProvider.GetUser(username, userIsOnline);
+            MembershipUser output = null;
+
+            try
+            {
+                output = InternalProvider.GetUser(username, userIsOnline);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+            }
+
+            return output;
         }
 
         public override MembershipUser GetUser(object providerUserKey, bool userIsOnline)
         {
-            return InternalProvider.GetUser(providerUserKey, userIsOnline);
+            MembershipUser output = null;
+
+            try
+            {
+                output = InternalProvider.GetUser(providerUserKey, userIsOnline);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+            }
+
+            return output;
         }
 
         public override string GetUserNameByEmail(string email)
         {
-            return InternalProvider.GetUserNameByEmail(email);
+            string output = null;
+
+            try
+            {
+                output = InternalProvider.GetUserNameByEmail(email);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+            }
+
+            return output;
         }
 
         public override int MaxInvalidPasswordAttempts
         {
             get
             {
-                return InternalProvider.MaxInvalidPasswordAttempts;
+                int output = 0;
+
+                try
+                {
+                    output = InternalProvider.MaxInvalidPasswordAttempts;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                    output = 0;
+                }
+
+                return output;
             }
         }
 
@@ -187,7 +426,19 @@ namespace WCFProviderProxy.Host
         {
             get
             {
-                return InternalProvider.MinRequiredNonAlphanumericCharacters;
+                int output = 0;
+
+                try
+                {
+                    output = InternalProvider.MinRequiredNonAlphanumericCharacters;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                    output = 0;
+                }
+
+                return output;
             }
         }
 
@@ -195,7 +446,19 @@ namespace WCFProviderProxy.Host
         {
             get
             {
-                return InternalProvider.MinRequiredPasswordLength;
+                int output = 0;
+
+                try
+                {
+                    output = InternalProvider.MinRequiredPasswordLength;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                    output = 0;
+                }
+
+                return output;
             }
         }
 
@@ -203,7 +466,19 @@ namespace WCFProviderProxy.Host
         {
             get
             {
-                return InternalProvider.PasswordAttemptWindow;
+                int output = 0;
+
+                try
+                {
+                    output = InternalProvider.PasswordAttemptWindow;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                    output = 0;
+                }
+
+                return output;
             }
         }
 
@@ -211,7 +486,19 @@ namespace WCFProviderProxy.Host
         {
             get
             {
-                return InternalProvider.PasswordFormat;
+                MembershipPasswordFormat output = MembershipPasswordFormat.Clear;
+
+                try
+                {
+                    output = InternalProvider.PasswordFormat;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                    output = MembershipPasswordFormat.Clear;
+                }
+
+                return output;
             }
         }
 
@@ -219,7 +506,18 @@ namespace WCFProviderProxy.Host
         {
             get
             {
-                return InternalProvider.PasswordStrengthRegularExpression;
+                string output = null;
+
+                try
+                {
+                    output = InternalProvider.PasswordStrengthRegularExpression;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                }
+
+                return output;
             }
         }
 
@@ -227,7 +525,19 @@ namespace WCFProviderProxy.Host
         {
             get
             {
-                return InternalProvider.RequiresQuestionAndAnswer;
+                bool output = false;
+
+                try
+                {
+                    output = InternalProvider.RequiresQuestionAndAnswer;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                    output = false;
+                }
+
+                return output;
             }
         }
 
@@ -235,28 +545,82 @@ namespace WCFProviderProxy.Host
         {
             get
             {
-                return InternalProvider.RequiresUniqueEmail;
+                bool output = false;
+
+                try
+                {
+                    output = InternalProvider.RequiresUniqueEmail;
+                }
+                catch (Exception ex)
+                {
+                    OnError(this, ex, false);
+                    output = false;
+                }
+
+                return output;
             }
         }
 
         public override string ResetPassword(string username, string answer)
         {
-            return InternalProvider.ResetPassword(username, answer);
+            string output = null;
+
+            try
+            {
+                output = InternalProvider.ResetPassword(username, answer);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+            }
+
+            return output;
         }
 
         public override bool UnlockUser(string userName)
         {
-            return InternalProvider.UnlockUser(userName);
+            bool output = false;
+
+            try
+            {
+                output = InternalProvider.UnlockUser(userName);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = false;
+            }
+
+            return output;
         }
 
         public override void UpdateUser(MembershipUser user)
         {
-            InternalProvider.UpdateUser(user);
+            try
+            {
+                InternalProvider.UpdateUser(user);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
+            }
         }
 
         public override bool ValidateUser(string username, string password)
         {
-            return InternalProvider.ValidateUser(username, password);
+            bool output = false;
+
+            try
+            {
+                output = InternalProvider.ValidateUser(username, password);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = false;
+            }
+
+            return output;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace WCFProviderProxy.Web
         {
             ChannelFactory<IWcfMembershipProvider> factory = new ChannelFactory<IWcfMembershipProvider>("RemoteMembershipProvider");
             IWcfMembershipProvider provider = factory.CreateChannel();
-            provider.SetMembershipProvider(RemoteProviderName);
+            provider.SetProvider(RemoteProviderName);
             return provider;
         }
 

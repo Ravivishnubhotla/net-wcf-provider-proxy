@@ -10,7 +10,7 @@ using WCFProviderProxy.Interfaces;
 
 namespace WCFProviderProxy.Host
 {
-    public class ProxyProfileProvider: ProfileProvider, IWcfProfileProvider 
+    public partial class ProxyProfileProvider: ProfileProvider, IWcfProfileProvider 
     {
         private static readonly ServiceHost serviceHost = new ServiceHost(typeof(ProxyProfileProvider));
 
@@ -19,26 +19,48 @@ namespace WCFProviderProxy.Host
 
         public static void OpenServiceHost()
         {
-            serviceHost.Open();
-            return;
+            try
+            {
+                serviceHost.Open();
+            }
+            catch (Exception ex)
+            {
+                OnError(typeof(ProxyProfileProvider), ex);
+            }
         }
 
         public static void CloseServiceHost()
         {
-            serviceHost.Close();
-            return;
+            try
+            {
+                if (serviceHost.State == CommunicationState.Opened)
+                {
+                    serviceHost.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(typeof(ProxyProfileProvider), ex);
+            }
         }
 
-
-        public void SetMembershipProvider(string ProviderName)
+        public void SetProvider(string ProviderName)
         {
-            if (String.IsNullOrWhiteSpace(ProviderName))
+            try
             {
-                InternalProvider = ProfileManager.Provider;
+                if (String.IsNullOrWhiteSpace(ProviderName))
+                {
+                    InternalProvider = ProfileManager.Provider;
+                }
+                else
+                {
+                    InternalProvider = ProfileManager.Providers[ProviderName];
+                }
             }
-            else
+            catch (Exception ex)
             {
-                InternalProvider = ProfileManager.Providers[ProviderName];
+                OnError(this, ex);
+                InternalProvider = ProfileManager.Provider;
             }
         }
 
@@ -47,103 +69,246 @@ namespace WCFProviderProxy.Host
 
         public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
         {
-            if (config == null)
-                throw new ArgumentNullException("config");
-
-            if (!String.IsNullOrWhiteSpace(config["applicationName"]))
+            try
             {
-                ApplicationName = config["applicationName"];
-            }
+                if (config == null)
+                    throw new ArgumentNullException("config");
 
-            if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+                if (!String.IsNullOrWhiteSpace(config["applicationName"]))
+                {
+                    ApplicationName = config["applicationName"];
+                }
+
+                if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+                {
+                    SetProvider(config["proxyProviderName"]);
+                }
+
+                // Initialize the abstract base class.
+                base.Initialize(name, config);
+            }
+            catch (Exception ex)
             {
-                InternalProvider = ProfileManager.Providers[config["proxyProviderName"]];
+                OnError(this, ex);
             }
-
-            // Initialize the abstract base class.
-            base.Initialize(name, config);
         }
 
         public override int DeleteInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate)
         {
-            return InternalProvider.DeleteInactiveProfiles(authenticationOption, userInactiveSinceDate);
+            int output = 0;
+
+            try
+            {
+                output = InternalProvider.DeleteInactiveProfiles(authenticationOption, userInactiveSinceDate);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = 0;
+            }
+
+            return output;
         }
 
         public override int DeleteProfiles(string[] usernames)
         {
-            return InternalProvider.DeleteProfiles(usernames);
+            int output = 0;
+
+            try
+            {
+                output = InternalProvider.DeleteProfiles(usernames);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = 0;
+            }
+
+            return output;
         }
 
         public override int DeleteProfiles(ProfileInfoCollection profiles)
         {
-            return InternalProvider.DeleteProfiles(profiles);
+            int output = 0;
+
+            try
+            {
+                output = InternalProvider.DeleteProfiles(profiles);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = 0;
+            }
+
+            return output;
         }
 
         public override ProfileInfoCollection FindInactiveProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
         {
-            return InternalProvider.FindInactiveProfilesByUserName(authenticationOption, usernameToMatch, userInactiveSinceDate, pageIndex, pageSize, out totalRecords);
+            ProfileInfoCollection output = null;
+
+            try
+            {
+                output = InternalProvider.FindInactiveProfilesByUserName(authenticationOption, usernameToMatch, userInactiveSinceDate, pageIndex, pageSize, out totalRecords);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+                totalRecords = 0;
+            }
+
+            return output;
         }
 
         public override ProfileInfoCollection FindProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
-            return InternalProvider.FindProfilesByUserName(authenticationOption, usernameToMatch, pageIndex, pageSize, out totalRecords);
+            ProfileInfoCollection output = null;
+
+            try
+            {
+                output = InternalProvider.FindProfilesByUserName(authenticationOption, usernameToMatch, pageIndex, pageSize, out totalRecords);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+                totalRecords = 0;
+            }
+
+            return output;
         }
 
         public override ProfileInfoCollection GetAllInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
         {
-            return InternalProvider.GetAllInactiveProfiles(authenticationOption, userInactiveSinceDate, pageIndex, pageSize, out totalRecords);
+            ProfileInfoCollection output = null;
+
+            try
+            {
+                output = InternalProvider.GetAllInactiveProfiles(authenticationOption, userInactiveSinceDate, pageIndex, pageSize, out totalRecords);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+                totalRecords = 0;
+            }
+
+            return output;
         }
 
         public override ProfileInfoCollection GetAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords)
         {
-            return InternalProvider.GetAllProfiles(authenticationOption, pageIndex, pageSize, out totalRecords);
+            ProfileInfoCollection output = null;
+
+            try
+            {
+                output = InternalProvider.GetAllProfiles(authenticationOption, pageIndex, pageSize, out totalRecords);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+                totalRecords = 0;
+            }
+
+            return output;
         }
 
         public override int GetNumberOfInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate)
         {
-            return InternalProvider.GetNumberOfInactiveProfiles(authenticationOption, userInactiveSinceDate);
+            int output = 0;
+
+            try
+            {
+                output = InternalProvider.GetNumberOfInactiveProfiles(authenticationOption, userInactiveSinceDate);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = 0;
+            }
+
+            return output;
         }
 
         public override SettingsPropertyValueCollection GetPropertyValues(SettingsContext context, SettingsPropertyCollection collection)
         {
-            return InternalProvider.GetPropertyValues(context, collection);
+            SettingsPropertyValueCollection output = null;
+
+            try
+            {
+                output = InternalProvider.GetPropertyValues(context, collection);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output = null;
+            }
+
+            return output;
         }
 
         public List<SettingsPropertyValue> GetPropertyValues(SettingsContext context, List<SettingsProperty> collection)
         {
-            SettingsPropertyCollection propertyCollection = new SettingsPropertyCollection();
+            List<SettingsPropertyValue> output = new List<SettingsPropertyValue>();
 
-            foreach (SettingsProperty property in collection)
+            try
             {
-                propertyCollection.Add(property);
+                SettingsPropertyCollection propertyCollection = new SettingsPropertyCollection();
+
+                foreach (SettingsProperty property in collection)
+                {
+                    propertyCollection.Add(property);
+                }
+
+                foreach (SettingsPropertyValue propertyValue in InternalProvider.GetPropertyValues(context, propertyCollection))
+                {
+                    output.Add(propertyValue);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex, false);
+                output.Clear();
             }
 
-            List<SettingsPropertyValue> propertyValueCollection = new List<SettingsPropertyValue>();
-
-            foreach(SettingsPropertyValue propertyValue in InternalProvider.GetPropertyValues(context, propertyCollection))
-            {
-                propertyValueCollection.Add(propertyValue);
-            }
-
-            return propertyValueCollection;
+            return output;
         }
 
         public override void SetPropertyValues(SettingsContext context, SettingsPropertyValueCollection collection)
         {
-            InternalProvider.SetPropertyValues(context, collection);
+            try
+            {
+                InternalProvider.SetPropertyValues(context, collection);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
+            }
+            
             return;
         }
 
         public void SetPropertyValues(SettingsContext context, List<SettingsPropertyValue> collection)
         {
-            SettingsPropertyValueCollection propertyValueCollection = new SettingsPropertyValueCollection();
-
-            foreach (SettingsPropertyValue propertyValue in collection)
+            try
             {
-                propertyValueCollection.Add(propertyValue);
+                SettingsPropertyValueCollection propertyValueCollection = new SettingsPropertyValueCollection();
+
+                foreach (SettingsPropertyValue propertyValue in collection)
+                {
+                    propertyValueCollection.Add(propertyValue);
+                }
+
+                InternalProvider.SetPropertyValues(context, propertyValueCollection);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
             }
 
-            InternalProvider.SetPropertyValues(context, propertyValueCollection);
             return;
         }
     }

@@ -12,7 +12,7 @@ namespace WCFProviderProxy.Interfaces
         string ApplicationName { [OperationContract] get; [OperationContract] set; }
 
         [OperationContract]
-        void SetMembershipProvider(string ProviderName);
+        void SetProvider(string ProviderName);
 
         [OperationContract]
         void AddUsersToRoles(string[] usernames, string[] roleNames);
