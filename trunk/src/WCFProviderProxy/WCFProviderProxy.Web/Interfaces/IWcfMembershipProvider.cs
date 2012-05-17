@@ -32,13 +32,13 @@ namespace WCFProviderProxy.Interfaces
         bool EnablePasswordRetrieval { [OperationContract] get; }
 
         [OperationContract]
-        MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords);
+        List<MembershipUser> ListUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords);
 
         [OperationContract]
-        MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords);
+        List<MembershipUser> ListUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords);
 
         [OperationContract]
-        MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords);
+        List<MembershipUser> ListAllUsers(int pageIndex, int pageSize, out int totalRecords);
         
         [OperationContract]
         int GetNumberOfUsersOnline();

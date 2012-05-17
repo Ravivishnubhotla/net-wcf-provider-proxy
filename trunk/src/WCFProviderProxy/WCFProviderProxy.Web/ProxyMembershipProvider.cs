@@ -98,7 +98,13 @@ namespace WCFProviderProxy.Web
         public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
             IWcfMembershipProvider remoteProvider = RemoteProvider();
-            MembershipUserCollection output = remoteProvider.FindUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords);
+            MembershipUserCollection output = new MembershipUserCollection();
+
+            foreach (MembershipUser user in remoteProvider.ListUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords))
+            {
+                output.Add(user);
+            }
+
             DisposeRemoteProvider(remoteProvider);
             return output;
         }
@@ -106,7 +112,13 @@ namespace WCFProviderProxy.Web
         public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
             IWcfMembershipProvider remoteProvider = RemoteProvider();
-            MembershipUserCollection output = remoteProvider.FindUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords);
+            MembershipUserCollection output = new MembershipUserCollection();
+
+            foreach (MembershipUser user in remoteProvider.ListUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords))
+            {
+                output.Add(user);
+            }
+
             DisposeRemoteProvider(remoteProvider);
             return output;
         }
@@ -114,7 +126,13 @@ namespace WCFProviderProxy.Web
         public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
         {
             IWcfMembershipProvider remoteProvider = RemoteProvider();
-            MembershipUserCollection output = remoteProvider.GetAllUsers(pageIndex, pageSize, out totalRecords);
+            MembershipUserCollection output = new MembershipUserCollection();
+
+            foreach (MembershipUser user in remoteProvider.ListAllUsers(pageIndex, pageSize, out totalRecords))
+            {
+                output.Add(user);
+            }
+
             DisposeRemoteProvider(remoteProvider);
             return output;
         }

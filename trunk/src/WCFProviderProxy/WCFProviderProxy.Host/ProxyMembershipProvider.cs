@@ -99,14 +99,50 @@ namespace WCFProviderProxy.Host
             }
         }
 
+        public List<MembershipUser> ListUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
+        {
+            List<MembershipUser> users = new List<MembershipUser>();
+
+            foreach (MembershipUser user in InternalProvider.FindUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords))
+            {
+                users.Add(user);
+            }
+
+            return users;
+        }
+
         public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
             return InternalProvider.FindUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords);
         }
 
+        public List<MembershipUser> ListUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
+        {
+            List<MembershipUser> users = new List<MembershipUser>();
+
+            foreach (MembershipUser user in InternalProvider.FindUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords))
+            {
+                users.Add(user);
+            }
+
+            return users;
+        }
+
         public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
             return InternalProvider.FindUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords);
+        }
+
+        public List<MembershipUser> ListAllUsers(int pageIndex, int pageSize, out int totalRecords)
+        {
+            List<MembershipUser> users = new List<MembershipUser>();
+
+            foreach (MembershipUser user in InternalProvider.GetAllUsers(pageIndex, pageSize, out totalRecords))
+            {
+                users.Add(user);
+            }
+
+            return users;
         }
 
         public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
