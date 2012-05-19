@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.ServiceModel;
 using System.Web.Configuration;
 using System.Web.Security;
 using WCFProviderProxy.Interfaces;
@@ -11,38 +10,8 @@ namespace WCFProviderProxy.Host
 {
     public partial class ProxyMembershipProvider : MembershipProvider, IWcfMembershipProvider 
     {
-        private static readonly MembershipSection membershipSection = new MembershipSection();
-        private static readonly ServiceHost serviceHost = new ServiceHost(typeof(ProxyMembershipProvider));
-        
         private MembershipProvider InternalProvider = Membership.Provider;
         private string description = "";
-
-        public static void OpenServiceHost()
-        {
-            try
-            {
-                serviceHost.Open();
-            }
-            catch (Exception ex)
-            {
-                OnError(typeof(ProxyMembershipProvider), ex);
-            }
-        }
-
-        public static void CloseServiceHost()
-        {
-            try
-            {
-                if (serviceHost.State == CommunicationState.Opened)
-                {
-                    serviceHost.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                OnError(typeof(ProxyMembershipProvider), ex);
-            }
-        }
 
         public void SetProvider(string ProviderName)
         {
@@ -59,7 +28,11 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex);
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
                 InternalProvider = Membership.Provider;
             }
         }
@@ -89,7 +62,10 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex);
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
             }
         }
 
@@ -103,7 +79,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = false;
             }
 
@@ -120,7 +96,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = false;
             }
 
@@ -137,7 +113,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
                 status = MembershipCreateStatus.ProviderError;
             }
@@ -155,7 +131,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = false;
             }
 
@@ -174,7 +150,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                     output = false;
                 }
 
@@ -194,7 +170,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                     output = false;
                 }
 
@@ -215,7 +191,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output.Clear();
                 totalRecords = 0;
             }
@@ -232,7 +208,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
                 totalRecords = 0;
             }
@@ -253,7 +229,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output.Clear();
                 totalRecords = 0;
             }
@@ -271,7 +247,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
                 totalRecords = 0;
             }
@@ -292,7 +268,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output.Clear();
                 totalRecords = 0;
             }
@@ -310,7 +286,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
                 totalRecords = 0;
             }
@@ -328,7 +304,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = 0;
             }
 
@@ -345,7 +321,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
             }
 
@@ -362,7 +338,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
             }
 
@@ -379,7 +355,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
             }
 
@@ -396,7 +372,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
             }
 
             return output;
@@ -414,7 +390,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                     output = 0;
                 }
 
@@ -434,7 +410,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                     output = 0;
                 }
 
@@ -454,7 +430,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                     output = 0;
                 }
 
@@ -474,7 +450,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                     output = 0;
                 }
 
@@ -494,7 +470,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                     output = MembershipPasswordFormat.Clear;
                 }
 
@@ -514,7 +490,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                 }
 
                 return output;
@@ -533,7 +509,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                     output = false;
                 }
 
@@ -553,7 +529,7 @@ namespace WCFProviderProxy.Host
                 }
                 catch (Exception ex)
                 {
-                    OnError(this, ex, false);
+                    OnError(this, ex);
                     output = false;
                 }
 
@@ -571,7 +547,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
             }
 
             return output;
@@ -587,7 +563,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = false;
             }
 
@@ -616,7 +592,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = false;
             }
 

@@ -11,37 +11,8 @@ namespace WCFProviderProxy.Host
 {
     public partial class ProxyRoleProvider : RoleProvider, IWcfRoleProvider
     {
-        private static readonly ServiceHost serviceHost = new ServiceHost(typeof(ProxyRoleProvider));
-
         private RoleProvider InternalProvider = Roles.Provider;
         private string description = "";
-
-        public static void OpenServiceHost()
-        {
-            try
-            {
-                serviceHost.Open();
-            }
-            catch (Exception ex)
-            {
-                OnError(typeof(ProxyProfileProvider), ex);
-            }
-        }
-
-        public static void CloseServiceHost()
-        {
-            try
-            {
-                if (serviceHost.State == CommunicationState.Opened)
-                {
-                    serviceHost.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                OnError(typeof(ProxyProfileProvider), ex, false);
-            }
-        }
 
         public void SetProvider(string ProviderName)
         {
@@ -130,7 +101,11 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, throwOnPopulatedRole);
+                if (!OnError(this, ex) && throwOnPopulatedRole)
+                {
+                    throw;
+                }
+
                 output = false;
             }
 
@@ -147,7 +122,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = new string[] { };
             }
 
@@ -164,7 +139,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = new string[] { };
             }
 
@@ -181,7 +156,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = new string[] { };
             }
 
@@ -198,7 +173,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = new string[] { };
             }
 
@@ -215,7 +190,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = false;
             }
 
@@ -246,7 +221,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = false;
             }
 

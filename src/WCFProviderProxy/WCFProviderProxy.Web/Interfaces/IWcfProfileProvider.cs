@@ -17,28 +17,28 @@ namespace WCFProviderProxy.Interfaces
         string ApplicationName { [OperationContract] get; [OperationContract] set; }
 
         [OperationContract]
-          int DeleteInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate);
+        int DeleteInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate);
 
         [OperationContract(Name = "DeleteProfilesByUserName")]
-          int DeleteProfiles(string[] usernames);
+        int DeleteProfiles(string[] usernames);
 
         [OperationContract(Name = "DeleteProfilesByProfiles")]
-          int DeleteProfiles(ProfileInfoCollection profiles);
+        int DeleteProfiles(List<ProfileInfo> profiles);
 
         [OperationContract]
-          ProfileInfoCollection FindInactiveProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords);
+        List<ProfileInfo> ListInactiveProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords);
 
         [OperationContract]
-          ProfileInfoCollection FindProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, int pageIndex, int pageSize, out int totalRecords);
+        List<ProfileInfo> ListProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, int pageIndex, int pageSize, out int totalRecords);
 
         [OperationContract]
-          ProfileInfoCollection GetAllInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords);
+        List<ProfileInfo> ListAllInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords);
 
         [OperationContract]
-          ProfileInfoCollection GetAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords);
+        List<ProfileInfo> ListAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords);
 
         [OperationContract]
-          int GetNumberOfInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate);
+        int GetNumberOfInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate);
 
         [OperationContract]
         List<SettingsPropertyValue> GetPropertyValues(SettingsContext context, List<SettingsProperty> collection);

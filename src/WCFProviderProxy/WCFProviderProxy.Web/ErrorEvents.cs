@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WCFProviderProxy.Host
+namespace WCFProviderProxy.Web
 {
     public class ErrorEventArgs : EventArgs
     {
@@ -17,7 +17,7 @@ namespace WCFProviderProxy.Host
 
     public partial class ProxyMembershipProvider
     {
-        public static  event EventHandler Error;
+        public static event EventHandler Error;
 
         protected static bool OnError(object sender, Exception ex)
         {

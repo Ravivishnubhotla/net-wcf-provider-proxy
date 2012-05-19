@@ -19,16 +19,16 @@ namespace WCFProviderProxy.Host
                 ProxyProfileProvider.Error += new EventHandler(ProxyProfileProvider_Error);
                 ProxyRoleProvider.Error += new EventHandler(ProxyRoleProvider_Error);
 
-                membershipService.Start();
-                profileService.Start();
-                roleService.Start();
+                membershipService.StartService();
+                profileService.StartService();
+                roleService.StartService();
 
                 Console.WriteLine("Press any key to exit.");
                 Console.ReadKey();
 
-                membershipService.Stop();
-                profileService.Stop();
-                roleService.Stop();
+                membershipService.StopService();
+                profileService.StopService();
+                roleService.StopService();
             }
             else
             {
@@ -54,8 +54,8 @@ namespace WCFProviderProxy.Host
 
     public class MembershipService : ServiceBase
     {
-        public void Start() { OnStart(null); }
-        public void Stop() { OnStop(); }
+        public void StartService() { OnStart(null); }
+        public void StopService() { OnStop(); }
         
         protected override void OnStart(string[] args)
         {
@@ -69,8 +69,8 @@ namespace WCFProviderProxy.Host
 
     public class ProfileService : ServiceBase
     {
-        public void Start() { OnStart(null); }
-        public void Stop() { OnStop(); }
+        public void StartService() { OnStart(null); }
+        public void StopService() { OnStop(); }
 
         protected override void OnStart(string[] args)
         {
@@ -84,8 +84,8 @@ namespace WCFProviderProxy.Host
 
     public class RoleService : ServiceBase
     {
-        public void Start() { OnStart(null); }
-        public void Stop() { OnStop(); }
+        public void StartService() { OnStart(null); }
+        public void StopService() { OnStop(); }
 
         protected override void OnStart(string[] args)
         {
