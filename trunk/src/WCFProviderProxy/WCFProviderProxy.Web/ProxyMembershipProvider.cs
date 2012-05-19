@@ -9,14 +9,16 @@ using WCFProviderProxy.Interfaces;
 
 namespace WCFProviderProxy.Web
 {
-    public class ProxyMembershipProvider : MembershipProvider
+    public partial class ProxyMembershipProvider : MembershipProvider
     {
+        private static readonly ChannelFactory<IWcfMembershipProvider> factory = new ChannelFactory<IWcfMembershipProvider>("RemoteMembershipProvider");
+
         private string RemoteProviderName = "";
         private IWcfMembershipProvider RemoteProvider()
         {
-            ChannelFactory<IWcfMembershipProvider> factory = new ChannelFactory<IWcfMembershipProvider>("RemoteMembershipProvider");
             IWcfMembershipProvider provider = factory.CreateChannel();
             provider.SetProvider(RemoteProviderName);
+
             return provider;
         }
 
@@ -27,49 +29,120 @@ namespace WCFProviderProxy.Web
 
         public override void Initialize(string name, NameValueCollection config)
         {
-            if (config == null)
-                throw new ArgumentNullException("config");
-
-            if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+            try
             {
-                RemoteProviderName = config["proxyProviderName"];
-            }
+                if (config == null)
+                    throw new ArgumentNullException("config");
 
-            // Initialize the abstract base class.
-            base.Initialize(name, config);
+                if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+                {
+                    RemoteProviderName = config["proxyProviderName"];
+                }
+
+                // Initialize the abstract base class.
+                base.Initialize(name, config);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+            }
         }
 
         public override string ApplicationName { get; set; }
 
         public override bool ChangePassword(string username, string oldPassword, string newPassword)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            bool output = remoteProvider.ChangePassword(username, oldPassword, newPassword);
-            DisposeRemoteProvider(remoteProvider);
+            bool output = false;
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.ChangePassword(username, oldPassword, newPassword);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = false;
+            }
+
             return output;
         }
 
         public override bool ChangePasswordQuestionAndAnswer(string username, string password, string newPasswordQuestion, string newPasswordAnswer)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            bool output = remoteProvider.ChangePasswordQuestionAndAnswer(username, password, newPasswordQuestion, newPasswordAnswer);
-            DisposeRemoteProvider(remoteProvider);
+            bool output = false;
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.ChangePasswordQuestionAndAnswer(username, password, newPasswordQuestion, newPasswordAnswer);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = false;
+            }
+
             return output;
         }
 
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            MembershipUser output = remoteProvider.CreateUser(username, password, email, passwordQuestion, passwordAnswer, isApproved, providerUserKey, out status);
-            DisposeRemoteProvider(remoteProvider);
+            MembershipUser output = null;
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.CreateUser(username, password, email, passwordQuestion, passwordAnswer, isApproved, providerUserKey, out status);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = null;
+                status = MembershipCreateStatus.ProviderError;
+            }
+
             return output;
         }
 
         public override bool DeleteUser(string username, bool deleteAllRelatedData)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            bool output = remoteProvider.DeleteUser(username, deleteAllRelatedData);
-            DisposeRemoteProvider(remoteProvider);
+            bool output = false;
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.DeleteUser(username, deleteAllRelatedData);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = false;
+            }
+
             return output;
         }
 
@@ -77,9 +150,24 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                bool output = remoteProvider.EnablePasswordReset;
-                DisposeRemoteProvider(remoteProvider);
+                bool output = false;
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.EnablePasswordReset;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = false;
+                }
+
                 return output;
             }
         }
@@ -88,92 +176,227 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                bool output = remoteProvider.EnablePasswordRetrieval;
-                DisposeRemoteProvider(remoteProvider);
+                bool output = false;
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.EnablePasswordRetrieval;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = false;
+                }
+
                 return output;
             }
         }
 
         public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
             MembershipUserCollection output = new MembershipUserCollection();
 
-            foreach (MembershipUser user in remoteProvider.ListUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords))
+            try
             {
-                output.Add(user);
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+
+                foreach (MembershipUser user in remoteProvider.ListUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(user);
+                }
+
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output.Clear();
+                totalRecords = 0;
             }
 
-            DisposeRemoteProvider(remoteProvider);
             return output;
         }
 
         public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
             MembershipUserCollection output = new MembershipUserCollection();
 
-            foreach (MembershipUser user in remoteProvider.ListUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords))
+            try
             {
-                output.Add(user);
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+
+                foreach (MembershipUser user in remoteProvider.ListUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(user);
+                }
+
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output.Clear();
+                totalRecords = 0;
             }
 
-            DisposeRemoteProvider(remoteProvider);
             return output;
         }
 
         public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
             MembershipUserCollection output = new MembershipUserCollection();
 
-            foreach (MembershipUser user in remoteProvider.ListAllUsers(pageIndex, pageSize, out totalRecords))
+            try
             {
-                output.Add(user);
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+
+                foreach (MembershipUser user in remoteProvider.ListAllUsers(pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(user);
+                }
+
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output.Clear();
+                totalRecords = 0;
             }
 
-            DisposeRemoteProvider(remoteProvider);
             return output;
         }
 
         public override int GetNumberOfUsersOnline()
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            int output = remoteProvider.GetNumberOfUsersOnline();
-            DisposeRemoteProvider(remoteProvider);
+            int output = 0;
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.GetNumberOfUsersOnline();
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = 0;
+            }
+
             return output;
         }
 
         public override string GetPassword(string username, string answer)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            string output = remoteProvider.GetPassword(username, answer);
-            DisposeRemoteProvider(remoteProvider);
+            string output = "";
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.GetPassword(username, answer);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = "";
+            }
+
             return output;
         }
 
         public override MembershipUser GetUser(string username, bool userIsOnline)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            MembershipUser output = remoteProvider.GetUser(username, userIsOnline);
-            DisposeRemoteProvider(remoteProvider);
+            MembershipUser output = null;
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.GetUser(username, userIsOnline);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = null;
+            }
+
             return output;
         }
 
         public override MembershipUser GetUser(object providerUserKey, bool userIsOnline)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            MembershipUser output = remoteProvider.GetUser(providerUserKey, userIsOnline);
-            DisposeRemoteProvider(remoteProvider);
+            MembershipUser output = null;
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.GetUser(providerUserKey, userIsOnline);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = null;
+            }
+
             return output;
         }
 
         public override string GetUserNameByEmail(string email)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            string output = remoteProvider.GetUserNameByEmail(email);
-            DisposeRemoteProvider(remoteProvider);
+            string output = "";
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.GetUserNameByEmail(email);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = "";
+            }
+
             return output;
         }
 
@@ -181,9 +404,24 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                int output = remoteProvider.MaxInvalidPasswordAttempts;
-                DisposeRemoteProvider(remoteProvider);
+                int output = 0;
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.MaxInvalidPasswordAttempts;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = 0;
+                }
+
                 return output;
             }
         }
@@ -192,9 +430,24 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                int output = remoteProvider.MinRequiredNonAlphanumericCharacters;
-                DisposeRemoteProvider(remoteProvider);
+                int output = 0;
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.MinRequiredNonAlphanumericCharacters;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = 0;
+                }
+
                 return output;
             }
         }
@@ -203,9 +456,24 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                int output = remoteProvider.MinRequiredPasswordLength;
-                DisposeRemoteProvider(remoteProvider);
+                int output = 0;
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.MinRequiredPasswordLength;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = 0;
+                }
+
                 return output;
             }
         }
@@ -214,9 +482,24 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                int output = remoteProvider.PasswordAttemptWindow;
-                DisposeRemoteProvider(remoteProvider);
+                int output = 0;
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.PasswordAttemptWindow;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = 0;
+                }
+
                 return output;
             }
         }
@@ -225,9 +508,24 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                MembershipPasswordFormat output = remoteProvider.PasswordFormat;
-                DisposeRemoteProvider(remoteProvider);
+                MembershipPasswordFormat output = MembershipPasswordFormat.Clear;
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.PasswordFormat;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = MembershipPasswordFormat.Clear;
+                }
+
                 return output;
             }
         }
@@ -236,9 +534,24 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                string output = remoteProvider.PasswordStrengthRegularExpression;
-                DisposeRemoteProvider(remoteProvider);
+                string output = "";
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.PasswordStrengthRegularExpression;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = "";
+                }
+
                 return output;
             }
         }
@@ -247,9 +560,24 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                bool output = remoteProvider.RequiresQuestionAndAnswer;
-                DisposeRemoteProvider(remoteProvider);
+                bool output = false;
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.RequiresQuestionAndAnswer;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = false;
+                }
+
                 return output;
             }
         }
@@ -258,41 +586,111 @@ namespace WCFProviderProxy.Web
         {
             get
             {
-                IWcfMembershipProvider remoteProvider = RemoteProvider();
-                bool output = remoteProvider.RequiresUniqueEmail;
-                DisposeRemoteProvider(remoteProvider);
+                bool output = false;
+
+                try
+                {
+                    IWcfMembershipProvider remoteProvider = RemoteProvider();
+                    output = remoteProvider.RequiresUniqueEmail;
+                    DisposeRemoteProvider(remoteProvider);
+                }
+                catch (Exception ex)
+                {
+                    if (!OnError(this, ex))
+                    {
+                        throw;
+                    }
+
+                    output = false;
+                }
+
                 return output;
             }
         }
 
         public override string ResetPassword(string username, string answer)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            string output = remoteProvider.ResetPassword(username, answer);
-            DisposeRemoteProvider(remoteProvider);
+            string output = "";
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.ResetPassword(username, answer);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = "";
+            }
+
             return output;
         }
 
         public override bool UnlockUser(string userName)
         {
+            bool output = false;
+
+            try{
             IWcfMembershipProvider remoteProvider = RemoteProvider();
-            bool output = remoteProvider.UnlockUser(userName);
+             output = remoteProvider.UnlockUser(userName);
             DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = false;
+            }
+
             return output;
         }
 
         public override void UpdateUser(MembershipUser user)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            remoteProvider.UpdateUser(user);
-            DisposeRemoteProvider(remoteProvider);
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                remoteProvider.UpdateUser(user);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+            }
+
         }
 
         public override bool ValidateUser(string username, string password)
         {
-            IWcfMembershipProvider remoteProvider = RemoteProvider();
-            bool output = remoteProvider.ValidateUser(username, password);
-            DisposeRemoteProvider(remoteProvider);
+            bool output = false;
+
+            try
+            {
+                IWcfMembershipProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.ValidateUser(username, password);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = false;
+            }
+
             return output;
         }
     }

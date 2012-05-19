@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ErrorEvents.cs" />
     <Compile Include="Interfaces\IWcfMembershipProvider.cs" />
     <Compile Include="Interfaces\IWcfProfileProvider.cs" />
     <Compile Include="Interfaces\IWcfRoleProvider.cs" />

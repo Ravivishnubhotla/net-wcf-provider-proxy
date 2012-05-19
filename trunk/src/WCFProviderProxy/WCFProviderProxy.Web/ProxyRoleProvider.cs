@@ -9,12 +9,13 @@ using WCFProviderProxy.Interfaces;
 
 namespace WCFProviderProxy.Web
 {
-    class ProxyRoleProvider : RoleProvider
+    public partial class ProxyRoleProvider : RoleProvider
     {
+        private static readonly ChannelFactory<IWcfRoleProvider> factory = new ChannelFactory<IWcfRoleProvider>("RemoteRoleProvider");
+
         private string RemoteProviderName = "";
         private IWcfRoleProvider RemoteProvider()
         {
-            ChannelFactory<IWcfRoleProvider> factory = new ChannelFactory<IWcfRoleProvider>("RemoteRoleProvider");
             IWcfRoleProvider provider = factory.CreateChannel();
             provider.SetProvider(RemoteProviderName);
             return provider;
@@ -27,97 +28,245 @@ namespace WCFProviderProxy.Web
 
         public override void Initialize(string name, NameValueCollection config)
         {
-            if (config == null)
-                throw new ArgumentNullException("config");
-
-            if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+            try
             {
-                RemoteProviderName = config["proxyProviderName"];
-            }
+                if (config == null)
+                    throw new ArgumentNullException("config");
 
-            // Initialize the abstract base class.
-            base.Initialize(name, config);
+                if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
+                {
+                    RemoteProviderName = config["proxyProviderName"];
+                }
+
+                // Initialize the abstract base class.
+                base.Initialize(name, config);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+            }
         }
 
         public override string ApplicationName { get; set; }
 
         public override void AddUsersToRoles(string[] usernames, string[] roleNames)
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            remoteProvider.AddUsersToRoles(usernames, roleNames);
-            DisposeRemoteProvider(remoteProvider);
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                remoteProvider.AddUsersToRoles(usernames, roleNames);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+            }
+
             return;
         }
 
         public override void CreateRole(string roleName)
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            remoteProvider.CreateRole(roleName);
-            DisposeRemoteProvider(remoteProvider);
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                remoteProvider.CreateRole(roleName);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+            }
+
             return;
         }
 
         public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            bool output = remoteProvider.DeleteRole(roleName, throwOnPopulatedRole);
-            DisposeRemoteProvider(remoteProvider);
+            bool output = false;
+
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.DeleteRole(roleName, throwOnPopulatedRole);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex) && throwOnPopulatedRole)
+                {
+                    throw;
+                }
+
+                output = false;
+            }
+
             return output;
         }
 
         public override string[] FindUsersInRole(string roleName, string usernameToMatch)
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            string[] output = remoteProvider.FindUsersInRole(roleName, usernameToMatch);
-            DisposeRemoteProvider(remoteProvider);
+            string[] output = { };
+
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.FindUsersInRole(roleName, usernameToMatch);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = new string[] { };
+            }
+
             return output;
         }
 
         public override string[] GetAllRoles()
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            string[] output = remoteProvider.GetAllRoles();
-            DisposeRemoteProvider(remoteProvider);
+            string[] output = { };
+
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.GetAllRoles();
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = new string[] { };
+            }
+
             return output;
         }
 
         public override string[] GetRolesForUser(string username)
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            string[] output = remoteProvider.GetRolesForUser(username);
-            DisposeRemoteProvider(remoteProvider);
+            string[] output = { };
+
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.GetRolesForUser(username);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = new string[] { };
+            }
+
             return output;
         }
 
         public override string[] GetUsersInRole(string roleName)
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            string[] output = remoteProvider.GetUsersInRole(roleName);
-            DisposeRemoteProvider(remoteProvider);
+            string[] output = { };
+
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.GetUsersInRole(roleName);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = new string[] { };
+            }
+
             return output;
         }
 
         public override bool IsUserInRole(string username, string roleName)
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            bool output = remoteProvider.IsUserInRole(username, roleName);
-            DisposeRemoteProvider(remoteProvider);
+            bool output = false;
+
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.IsUserInRole(username, roleName);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = false;
+            }
+
             return output;
         }
 
         public override void RemoveUsersFromRoles(string[] usernames, string[] roleNames)
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            remoteProvider.RemoveUsersFromRoles(usernames, roleNames);
-            DisposeRemoteProvider(remoteProvider);
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                remoteProvider.RemoveUsersFromRoles(usernames, roleNames);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+            }
+
             return;
         }
 
         public override bool RoleExists(string roleName)
         {
-            IWcfRoleProvider remoteProvider = RemoteProvider();
-            bool output = remoteProvider.RoleExists(roleName);
-            DisposeRemoteProvider(remoteProvider);
+            bool output = false;
+
+            try
+            {
+                IWcfRoleProvider remoteProvider = RemoteProvider();
+                output = remoteProvider.RoleExists(roleName);
+                DisposeRemoteProvider(remoteProvider);
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
+
+                output = false;
+            }
+
             return output;
         }
     }

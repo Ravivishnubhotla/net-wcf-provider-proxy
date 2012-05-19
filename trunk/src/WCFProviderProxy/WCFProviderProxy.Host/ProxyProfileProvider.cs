@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text;
-using System.ServiceModel;
 using System.Web.Configuration;
 using System.Web.Profile;
 using WCFProviderProxy.Interfaces;
@@ -12,37 +11,8 @@ namespace WCFProviderProxy.Host
 {
     public partial class ProxyProfileProvider: ProfileProvider, IWcfProfileProvider 
     {
-        private static readonly ServiceHost serviceHost = new ServiceHost(typeof(ProxyProfileProvider));
-
         private ProfileProvider InternalProvider = ProfileManager.Provider;
         private string description = "";
-
-        public static void OpenServiceHost()
-        {
-            try
-            {
-                serviceHost.Open();
-            }
-            catch (Exception ex)
-            {
-                OnError(typeof(ProxyProfileProvider), ex);
-            }
-        }
-
-        public static void CloseServiceHost()
-        {
-            try
-            {
-                if (serviceHost.State == CommunicationState.Opened)
-                {
-                    serviceHost.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                OnError(typeof(ProxyProfileProvider), ex);
-            }
-        }
 
         public void SetProvider(string ProviderName)
         {
@@ -103,7 +73,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = 0;
             }
 
@@ -120,7 +90,31 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
+                output = 0;
+            }
+
+            return output;
+        }
+
+        public int DeleteProfiles(List<ProfileInfo> profiles)
+        {
+            int output = 0;
+
+            try
+            {
+                ProfileInfoCollection profileCollection = new ProfileInfoCollection();
+
+                foreach (ProfileInfo profile in profiles)
+                {
+                    profileCollection.Add(profile);
+                }
+
+                output = InternalProvider.DeleteProfiles(profileCollection);
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
                 output = 0;
             }
 
@@ -137,8 +131,29 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = 0;
+            }
+
+            return output;
+        }
+
+        public List<ProfileInfo> ListInactiveProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
+        {
+            List<ProfileInfo> output = new List<ProfileInfo>(); ;
+
+            try
+            {
+                foreach (ProfileInfo profileInfo in InternalProvider.FindInactiveProfilesByUserName(authenticationOption, usernameToMatch, userInactiveSinceDate, pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(profileInfo);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
+                output.Clear();
+                totalRecords = 0;
             }
 
             return output;
@@ -154,8 +169,29 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
+                totalRecords = 0;
+            }
+
+            return output;
+        }
+
+        public List<ProfileInfo> ListProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
+        {
+            List<ProfileInfo> output = new List<ProfileInfo>();
+
+            try
+            {
+                foreach (ProfileInfo profileInfo in InternalProvider.FindProfilesByUserName(authenticationOption, usernameToMatch, pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(profileInfo);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
+                output.Clear();
                 totalRecords = 0;
             }
 
@@ -172,8 +208,29 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
+                totalRecords = 0;
+            }
+
+            return output;
+        }
+
+        public List<ProfileInfo> ListAllInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
+        {
+            List<ProfileInfo> output = new List<ProfileInfo>();
+
+            try
+            {
+                foreach (ProfileInfo profileInfo in InternalProvider.GetAllInactiveProfiles(authenticationOption, userInactiveSinceDate, pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(profileInfo);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
+                output.Clear();
                 totalRecords = 0;
             }
 
@@ -190,8 +247,29 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
+                totalRecords = 0;
+            }
+
+            return output;
+        }
+
+        public  List<ProfileInfo> ListAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords)
+        {
+            List<ProfileInfo> output = new List<ProfileInfo>();
+
+            try
+            {
+                foreach (ProfileInfo profileInfo in InternalProvider.GetAllProfiles(authenticationOption, pageIndex, pageSize, out totalRecords))
+                {
+                    output.Add(profileInfo);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(this, ex);
+                output.Clear();
                 totalRecords = 0;
             }
 
@@ -208,7 +286,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
                 totalRecords = 0;
             }
@@ -226,7 +304,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = 0;
             }
 
@@ -243,7 +321,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output = null;
             }
 
@@ -270,7 +348,7 @@ namespace WCFProviderProxy.Host
             }
             catch (Exception ex)
             {
-                OnError(this, ex, false);
+                OnError(this, ex);
                 output.Clear();
             }
 
