@@ -9,13 +9,16 @@ using WCFProviderProxy.Interfaces;
 
 namespace WCFProviderProxy.Host
 {
-    public partial class ProxyProfileProvider: ProfileProvider, IWcfProfileProvider 
+    public partial class ProxyProfileProvider: ProfileProvider, IWcfProfileProvider
     {
+        private static readonly string name = typeof(ProxyProfileProvider).Name;
         private ProfileProvider InternalProvider = ProfileManager.Provider;
         private string description = "";
 
         public void SetProvider(string ProviderName)
         {
+            OnDebug(this, name + ".SetProvider()");
+
             try
             {
                 if (String.IsNullOrWhiteSpace(ProviderName))
@@ -26,6 +29,8 @@ namespace WCFProviderProxy.Host
                 {
                     InternalProvider = ProfileManager.Providers[ProviderName];
                 }
+
+                OnDebug(this, name + ": InternalProvider = " + InternalProvider.Name);
             }
             catch (Exception ex)
             {
@@ -39,6 +44,8 @@ namespace WCFProviderProxy.Host
 
         public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
         {
+            OnDebug(this, name + ".Initialize()");
+
             try
             {
                 if (config == null)
@@ -47,6 +54,7 @@ namespace WCFProviderProxy.Host
                 if (!String.IsNullOrWhiteSpace(config["applicationName"]))
                 {
                     ApplicationName = config["applicationName"];
+                    OnDebug(this, name + ": ApplicationName = " + ApplicationName);
                 }
 
                 if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
@@ -56,20 +64,28 @@ namespace WCFProviderProxy.Host
 
                 // Initialize the abstract base class.
                 base.Initialize(name, config);
+
+                OnLog(this, name + ": Initialized.");
             }
             catch (Exception ex)
             {
-                OnError(this, ex);
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
             }
         }
 
         public override int DeleteInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate)
         {
+            OnDebug(this, name + ".DeleteInactiveProfiles()");
+
             int output = 0;
 
             try
             {
                 output = InternalProvider.DeleteInactiveProfiles(authenticationOption, userInactiveSinceDate);
+                OnLog(this, name + ": Deleted " + output.ToString() + " profiles inactive since " + userInactiveSinceDate.ToString("u") + ".");
             }
             catch (Exception ex)
             {
@@ -82,11 +98,14 @@ namespace WCFProviderProxy.Host
 
         public override int DeleteProfiles(string[] usernames)
         {
+            OnDebug(this, name + ".DeleteProfiles()");
+
             int output = 0;
 
             try
             {
                 output = InternalProvider.DeleteProfiles(usernames);
+                OnLog(this, name + ": Deleted " + output.ToString() + " profiles (" + string.Join(",", usernames) + ").");
             }
             catch (Exception ex)
             {
@@ -99,6 +118,8 @@ namespace WCFProviderProxy.Host
 
         public int DeleteProfiles(List<ProfileInfo> profiles)
         {
+            OnDebug(this, name + ".DeleteProfiles()");
+
             int output = 0;
 
             try
@@ -111,6 +132,7 @@ namespace WCFProviderProxy.Host
                 }
 
                 output = InternalProvider.DeleteProfiles(profileCollection);
+                OnLog(this, name + ": Deleted " + output.ToString() + " profiles.");
             }
             catch (Exception ex)
             {
@@ -123,11 +145,14 @@ namespace WCFProviderProxy.Host
 
         public override int DeleteProfiles(ProfileInfoCollection profiles)
         {
+            OnDebug(this, name + ".DeleteProfiles()");
+
             int output = 0;
 
             try
             {
                 output = InternalProvider.DeleteProfiles(profiles);
+                OnLog(this, name + ": Deleted " + output.ToString() + " profiles.");
             }
             catch (Exception ex)
             {
@@ -140,6 +165,8 @@ namespace WCFProviderProxy.Host
 
         public List<ProfileInfo> ListInactiveProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".ListInactiveProfilesByUserName()");
+
             List<ProfileInfo> output = new List<ProfileInfo>(); ;
 
             try
@@ -161,6 +188,8 @@ namespace WCFProviderProxy.Host
 
         public override ProfileInfoCollection FindInactiveProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".FindInactiveProfilesByUserName()");
+
             ProfileInfoCollection output = null;
 
             try
@@ -179,6 +208,8 @@ namespace WCFProviderProxy.Host
 
         public List<ProfileInfo> ListProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".ListProfilesByUserName()");
+
             List<ProfileInfo> output = new List<ProfileInfo>();
 
             try
@@ -200,6 +231,8 @@ namespace WCFProviderProxy.Host
 
         public override ProfileInfoCollection FindProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".FindProfilesByUserName()");
+
             ProfileInfoCollection output = null;
 
             try
@@ -218,6 +251,8 @@ namespace WCFProviderProxy.Host
 
         public List<ProfileInfo> ListAllInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".ListAllInactiveProfiles()");
+
             List<ProfileInfo> output = new List<ProfileInfo>();
 
             try
@@ -239,6 +274,8 @@ namespace WCFProviderProxy.Host
 
         public override ProfileInfoCollection GetAllInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".GetAllInactiveProfiles()");
+
             ProfileInfoCollection output = null;
 
             try
@@ -257,6 +294,8 @@ namespace WCFProviderProxy.Host
 
         public  List<ProfileInfo> ListAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".ListAllProfiles()");
+
             List<ProfileInfo> output = new List<ProfileInfo>();
 
             try
@@ -278,6 +317,8 @@ namespace WCFProviderProxy.Host
 
         public override ProfileInfoCollection GetAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".GetAllProfiles()");
+
             ProfileInfoCollection output = null;
 
             try
@@ -296,6 +337,8 @@ namespace WCFProviderProxy.Host
 
         public override int GetNumberOfInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate)
         {
+            OnDebug(this, name + ".GetNumberOfInactiveProfiles()");
+
             int output = 0;
 
             try
@@ -313,6 +356,8 @@ namespace WCFProviderProxy.Host
 
         public override SettingsPropertyValueCollection GetPropertyValues(SettingsContext context, SettingsPropertyCollection collection)
         {
+            OnDebug(this, name + ".GetPropertyValues()");
+
             SettingsPropertyValueCollection output = null;
 
             try
@@ -330,6 +375,8 @@ namespace WCFProviderProxy.Host
 
         public List<SettingsPropertyValue> GetPropertyValues(SettingsContext context, List<SettingsProperty> collection)
         {
+            OnDebug(this, name + ".GetPropertyValues()");
+
             List<SettingsPropertyValue> output = new List<SettingsPropertyValue>();
 
             try
@@ -357,9 +404,12 @@ namespace WCFProviderProxy.Host
 
         public override void SetPropertyValues(SettingsContext context, SettingsPropertyValueCollection collection)
         {
+            OnDebug(this, name + ".SetPropertyValues()");
+
             try
             {
                 InternalProvider.SetPropertyValues(context, collection);
+                OnLog(this, name + ": Set property values.");
             }
             catch (Exception ex)
             {
@@ -371,6 +421,8 @@ namespace WCFProviderProxy.Host
 
         public void SetPropertyValues(SettingsContext context, List<SettingsPropertyValue> collection)
         {
+            OnDebug(this, name + ".SetPropertyValues()");
+
             try
             {
                 SettingsPropertyValueCollection propertyValueCollection = new SettingsPropertyValueCollection();
@@ -381,6 +433,7 @@ namespace WCFProviderProxy.Host
                 }
 
                 InternalProvider.SetPropertyValues(context, propertyValueCollection);
+                OnLog(this, name + ": Set property values.");
             }
             catch (Exception ex)
             {

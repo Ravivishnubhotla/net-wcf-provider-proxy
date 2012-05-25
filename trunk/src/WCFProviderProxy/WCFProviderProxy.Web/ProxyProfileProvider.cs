@@ -12,11 +12,14 @@ namespace WCFProviderProxy.Web
 {
     public partial class ProxyProfileProvider : ProfileProvider
     {
+        private static readonly string name = typeof(ProxyProfileProvider).Name;
         private static readonly ChannelFactory<IWcfProfileProvider> factory = new ChannelFactory<IWcfProfileProvider>("ProfileRoleProvider");
 
         private string RemoteProviderName = "";
         private IWcfProfileProvider RemoteProvider()
         {
+            OnDebug(this, name + ".RemoteProvider()");
+
             IWcfProfileProvider provider = factory.CreateChannel();
             provider.SetProvider(RemoteProviderName);
             return provider;
@@ -24,11 +27,15 @@ namespace WCFProviderProxy.Web
 
         private void DisposeRemoteProvider(IWcfProfileProvider RemoteProvider)
         {
+            OnDebug(this, name + ".DisposeRemoteProvider()");
+
             ((IClientChannel)RemoteProvider).Dispose();
         }
 
         public override void Initialize(string name, NameValueCollection config)
         {
+            OnDebug(this, name + ".Initialize()");
+
             try
             {
                 if (config == null)
@@ -37,10 +44,13 @@ namespace WCFProviderProxy.Web
                 if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
                 {
                     RemoteProviderName = config["proxyProviderName"];
+                    OnDebug(this, name + ": RemoteProviderName = '" + RemoteProviderName + "'.");
                 }
 
                 // Initialize the abstract base class.
                 base.Initialize(name, config);
+
+                OnLog(this, name + ": Initialized.");
             }
             catch (Exception ex)
             {
@@ -56,6 +66,8 @@ namespace WCFProviderProxy.Web
 
         public override int DeleteInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate)
         {
+            OnDebug(this, name + ".DeleteInactiveProfiles()");
+
             int output = 0;
 
             try
@@ -63,6 +75,7 @@ namespace WCFProviderProxy.Web
                 IWcfProfileProvider remoteProvider = RemoteProvider();
                 output = remoteProvider.DeleteInactiveProfiles(authenticationOption, userInactiveSinceDate);
                 DisposeRemoteProvider(remoteProvider);
+                OnLog(this, name + ": Deleted " + output.ToString() + " profiles inactive since " + userInactiveSinceDate.ToString("u") + ".");
             }
             catch (Exception ex)
             {
@@ -79,6 +92,8 @@ namespace WCFProviderProxy.Web
 
         public override int DeleteProfiles(string[] usernames)
         {
+            OnDebug(this, name + ".DeleteProfiles()");
+
             int output = 0;
 
             try
@@ -86,6 +101,7 @@ namespace WCFProviderProxy.Web
                 IWcfProfileProvider remoteProvider = RemoteProvider();
                 output = remoteProvider.DeleteProfiles(usernames);
                 DisposeRemoteProvider(remoteProvider);
+                OnLog(this, name + ": Deleted " + output.ToString() + " profiles (" + string.Join(",", usernames) + ").");
             }
             catch (Exception ex)
             {
@@ -102,6 +118,8 @@ namespace WCFProviderProxy.Web
 
         public override int DeleteProfiles(ProfileInfoCollection profiles)
         {
+            OnDebug(this, name + ".DeleteProfiles()");
+
             int output = 0;
 
             try
@@ -116,6 +134,7 @@ namespace WCFProviderProxy.Web
                 
                 output = remoteProvider.DeleteProfiles(profileList);
                 DisposeRemoteProvider(remoteProvider);
+                OnLog(this, name + ": Deleted " + output.ToString() + " profiles.");
             }
             catch (Exception ex)
             {
@@ -132,6 +151,8 @@ namespace WCFProviderProxy.Web
 
         public override ProfileInfoCollection FindInactiveProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".FindInactiveProfilesByUserName()");
+
             ProfileInfoCollection output = null;
 
             try
@@ -161,6 +182,8 @@ namespace WCFProviderProxy.Web
 
         public override ProfileInfoCollection FindProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".FindProfilesByUserName()");
+
             ProfileInfoCollection output = null;
 
             try
@@ -190,6 +213,8 @@ namespace WCFProviderProxy.Web
 
         public override ProfileInfoCollection GetAllInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".GetAllInactiveProfiles()");
+
             ProfileInfoCollection output = null;
 
             try
@@ -219,6 +244,8 @@ namespace WCFProviderProxy.Web
 
         public override ProfileInfoCollection GetAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".GetAllProfiles()");
+
             ProfileInfoCollection output = null;
 
             try
@@ -248,6 +275,8 @@ namespace WCFProviderProxy.Web
 
         public override int GetNumberOfInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate)
         {
+            OnDebug(this, name + ".GetNumberOfInactiveProfiles()");
+
             int output = 0;
 
             try
@@ -271,6 +300,8 @@ namespace WCFProviderProxy.Web
 
         public override SettingsPropertyValueCollection GetPropertyValues(SettingsContext context, SettingsPropertyCollection collection)
         {
+            OnDebug(this, name + ".GetPropertyValues()");
+
             SettingsPropertyValueCollection output = new SettingsPropertyValueCollection();
 
             try
@@ -304,6 +335,8 @@ namespace WCFProviderProxy.Web
 
         public override void SetPropertyValues(SettingsContext context, SettingsPropertyValueCollection collection)
         {
+            OnDebug(this, name + ".SetPropertyValues()");
+
             try
             {
                 IWcfProfileProvider remoteProvider = RemoteProvider();
@@ -316,6 +349,7 @@ namespace WCFProviderProxy.Web
 
                 remoteProvider.SetPropertyValues(context, propertyValues);
                 DisposeRemoteProvider(remoteProvider);
+                OnLog(this, name + ": Set property values.");
             }
             catch (Exception ex)
             {
