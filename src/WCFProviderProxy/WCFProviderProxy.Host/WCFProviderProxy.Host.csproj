@@ -50,8 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ErrorEvents.cs" />
     <Compile Include="Hosting.cs" />
+    <Compile Include="ProxyEvents.cs" />
     <Compile Include="Service.cs">
       <SubType>Component</SubType>
     </Compile>

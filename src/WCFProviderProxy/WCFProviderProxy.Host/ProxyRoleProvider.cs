@@ -11,11 +11,14 @@ namespace WCFProviderProxy.Host
 {
     public partial class ProxyRoleProvider : RoleProvider, IWcfRoleProvider
     {
+        private static readonly string name = typeof(ProxyRoleProvider).Name;
         private RoleProvider InternalProvider = Roles.Provider;
         private string description = "";
 
         public void SetProvider(string ProviderName)
         {
+            OnDebug(this, name + ".SetProvider()");
+
             try
             {
                 if (String.IsNullOrWhiteSpace(ProviderName))
@@ -26,6 +29,8 @@ namespace WCFProviderProxy.Host
                 {
                     InternalProvider = Roles.Providers[ProviderName];
                 }
+
+                OnDebug(this, name + ": InternalProvider = " + InternalProvider.Name);
             }
             catch (Exception ex)
             {
@@ -39,6 +44,8 @@ namespace WCFProviderProxy.Host
 
         public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
         {
+            OnDebug(this, name + ".Initialize()");
+
             try
             {
                 if (config == null)
@@ -47,6 +54,7 @@ namespace WCFProviderProxy.Host
                 if (!String.IsNullOrWhiteSpace(config["applicationName"]))
                 {
                     ApplicationName = config["applicationName"];
+                    OnDebug(this, name + ": ApplicationName = " + ApplicationName);
                 }
 
                 if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
@@ -56,22 +64,33 @@ namespace WCFProviderProxy.Host
 
                 // Initialize the abstract base class.
                 base.Initialize(name, config);
+
+                OnLog(this, name + ": Initialized.");
             }
             catch (Exception ex)
             {
-                OnError(this, ex);
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
             }
         }
 
         public override void AddUsersToRoles(string[] usernames, string[] roleNames)
         {
+            OnDebug(this, name + ".AddUsersToRoles()");
+
             try
             {
                 InternalProvider.AddUsersToRoles(usernames, roleNames);
+                OnLog(this, name + ": Added users (" + string.Join(",", usernames) + ") to roles (" + string.Join(",", roleNames) + ").");
             }
             catch (Exception ex)
             {
-                OnError(this, ex);
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
             }
 
             return;
@@ -79,13 +98,19 @@ namespace WCFProviderProxy.Host
 
         public override void CreateRole(string roleName)
         {
+            OnDebug(this, name + ".CreateRole()");
+
             try
             {
                 InternalProvider.CreateRole(roleName);
+                OnLog(this, name + ": Created role '" + roleName + "'");
             }
             catch (Exception ex)
             {
-                OnError(this, ex);
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
             }
 
             return;
@@ -93,11 +118,14 @@ namespace WCFProviderProxy.Host
 
         public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)
         {
+            OnDebug(this, name + ".DeleteRole()");
+
             bool output = false;
 
             try
             {
                 output = InternalProvider.DeleteRole(roleName, throwOnPopulatedRole);
+                OnLog(this, name + ": Deleted role '" + roleName + "'.");
             }
             catch (Exception ex)
             {
@@ -114,6 +142,8 @@ namespace WCFProviderProxy.Host
 
         public override string[] FindUsersInRole(string roleName, string usernameToMatch)
         {
+            OnDebug(this, name + ".FindUsersInRole()");
+
             string[] output = null;
 
             try
@@ -131,6 +161,8 @@ namespace WCFProviderProxy.Host
 
         public override string[] GetAllRoles()
         {
+            OnDebug(this, name + ".GetAllRoles()");
+
             string[] output = null;
 
             try
@@ -148,6 +180,8 @@ namespace WCFProviderProxy.Host
 
         public override string[] GetRolesForUser(string username)
         {
+            OnDebug(this, name + ".GetRolesForUser()");
+
             string[] output = null;
 
             try
@@ -165,6 +199,8 @@ namespace WCFProviderProxy.Host
 
         public override string[] GetUsersInRole(string roleName)
         {
+            OnDebug(this, name + ".GetUsersInRole()");
+
             string[] output = null;
 
             try
@@ -182,6 +218,8 @@ namespace WCFProviderProxy.Host
 
         public override bool IsUserInRole(string username, string roleName)
         {
+            OnDebug(this, name + ".IsUerInRole()");
+
             bool output = false;
 
             try
@@ -199,13 +237,19 @@ namespace WCFProviderProxy.Host
 
         public override void RemoveUsersFromRoles(string[] usernames, string[] roleNames)
         {
+            OnDebug(this, name + ".RemoveUsersFromRoles()");
+
             try
             {
                 InternalProvider.RemoveUsersFromRoles(usernames, roleNames);
+                OnLog(this, name + ": Removed users (" + string.Join(",", usernames) + ") from roles (" + string.Join(",", roleNames) + ").");
             }
             catch (Exception ex)
             {
-                OnError(this, ex);
+                if (!OnError(this, ex))
+                {
+                    throw;
+                }
             }
             
             return;
@@ -213,6 +257,8 @@ namespace WCFProviderProxy.Host
 
         public override bool RoleExists(string roleName)
         {
+            OnDebug(this, name + ".RoleExists()");
+
             bool output = false;
 
             try

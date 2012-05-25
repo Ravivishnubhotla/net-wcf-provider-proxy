@@ -8,13 +8,16 @@ using WCFProviderProxy.Interfaces;
 
 namespace WCFProviderProxy.Host
 {
-    public partial class ProxyMembershipProvider : MembershipProvider, IWcfMembershipProvider 
+    public partial class ProxyMembershipProvider : MembershipProvider, IWcfMembershipProvider
     {
+        private static readonly string name = typeof(ProxyMembershipProvider).Name;
         private MembershipProvider InternalProvider = Membership.Provider;
         private string description = "";
 
         public void SetProvider(string ProviderName)
         {
+            OnDebug(this, name + ".SetProvider()");
+
             try
             {
                 if (String.IsNullOrWhiteSpace(ProviderName))
@@ -25,6 +28,8 @@ namespace WCFProviderProxy.Host
                 {
                     InternalProvider = Membership.Providers[ProviderName];
                 }
+
+                OnDebug(this, name + ": InternalProvider = " + InternalProvider.Name);
             }
             catch (Exception ex)
             {
@@ -42,6 +47,8 @@ namespace WCFProviderProxy.Host
 
         public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
         {
+            OnDebug(this, name + ".Initialize()");
+
             try
             {
                 if (config == null)
@@ -50,6 +57,7 @@ namespace WCFProviderProxy.Host
                 if (!String.IsNullOrWhiteSpace(config["applicationName"]))
                 {
                     ApplicationName = config["applicationName"];
+                    OnDebug(this, name + ": ApplicationName = " + ApplicationName);
                 }
 
                 if (!String.IsNullOrWhiteSpace(config["proxyProviderName"]))
@@ -59,6 +67,8 @@ namespace WCFProviderProxy.Host
 
                 // Initialize the abstract base class.
                 base.Initialize(name, config);
+
+                OnLog(this, name + ": Initialized.");
             }
             catch (Exception ex)
             {
@@ -71,11 +81,19 @@ namespace WCFProviderProxy.Host
 
         public override bool ChangePassword(string username, string oldPassword, string newPassword)
         {
+            OnDebug(this, name + ".ChangePassword()");
+
             bool output = false;
 
             try
             {
                 output = InternalProvider.ChangePassword(username, oldPassword, newPassword);
+                OnSecurityAudit(this, name + ".ChangePassword(" + username + ").", output);
+
+                if (output)
+                {
+                    OnLog(this, name + ": Changed password for user '" + username + "'.");
+                }
             }
             catch (Exception ex)
             {
@@ -88,11 +106,19 @@ namespace WCFProviderProxy.Host
         
         public override bool ChangePasswordQuestionAndAnswer(string username, string password, string newPasswordQuestion, string newPasswordAnswer)
         {
+            OnDebug(this, name + ".ChangePasswordQuestionAndAnswer()");
+
             bool output = false;
 
             try
             {
                 output = InternalProvider.ChangePasswordQuestionAndAnswer(username, password, newPasswordQuestion, newPasswordAnswer);
+                OnSecurityAudit(this, name + ".ChangePasswordQuestionAndAnswer(" + username + ").", output);
+
+                if (output)
+                {
+                    OnLog(this, name + ": Changed password question and answer for user '" + username + "'.");
+                }
             }
             catch (Exception ex)
             {
@@ -105,11 +131,19 @@ namespace WCFProviderProxy.Host
 
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
+            OnDebug(this, name + ".CreateUser()");
+
             MembershipUser output = null;
 
             try
             {
                 output = InternalProvider.CreateUser(username, password, email, passwordQuestion, passwordAnswer, isApproved, providerUserKey, out status);
+                OnSecurityAudit(this, name + ".CreateUser(" + username + ", " + email + ").", (output != null));
+
+                if (output != null)
+                {
+                    OnLog(this, name + ": Created user '" + username + "'.");
+                }
             }
             catch (Exception ex)
             {
@@ -123,11 +157,19 @@ namespace WCFProviderProxy.Host
 
         public override bool DeleteUser(string username, bool deleteAllRelatedData)
         {
+            OnDebug(this, name + ".DeleteUser()");
+
             bool output = false;
 
             try
             {
                 output = InternalProvider.DeleteUser(username, deleteAllRelatedData);
+                OnSecurityAudit(this, name + ".DeleteUser(" + username + ").", output);
+
+                if (output)
+                {
+                    OnLog(this, name + ": Deleted user '" + username + "'.");
+                }
             }
             catch (Exception ex)
             {
@@ -142,6 +184,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".EnablePasswordReset");
+
                 bool output = false;
 
                 try
@@ -162,6 +206,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".EnablePasswordRetrieval");
+
                 bool output = false;
 
                 try
@@ -180,6 +226,8 @@ namespace WCFProviderProxy.Host
 
         public List<MembershipUser> ListUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".ListUsersByEmail()");
+
             List<MembershipUser> output = new List<MembershipUser>();
 
             try
@@ -188,6 +236,8 @@ namespace WCFProviderProxy.Host
                 {
                     output.Add(user);
                 }
+
+                OnSecurityAudit(this, name + ".ListUsersByEmail(" + emailToMatch + ").", (totalRecords > 0));
             }
             catch (Exception ex)
             {
@@ -201,10 +251,13 @@ namespace WCFProviderProxy.Host
 
         public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".FindUsersByEmail()");
+
             MembershipUserCollection output = null;
             try
             {
                 output = InternalProvider.FindUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords);
+                OnSecurityAudit(this, name + ".FindUsersByEmail(" + emailToMatch + ").", (totalRecords > 0));
             }
             catch (Exception ex)
             {
@@ -218,6 +271,8 @@ namespace WCFProviderProxy.Host
 
         public List<MembershipUser> ListUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".ListUsersByName()");
+
             List<MembershipUser> output = new List<MembershipUser>();
 
             try
@@ -226,6 +281,8 @@ namespace WCFProviderProxy.Host
                 {
                     output.Add(user);
                 }
+
+                OnSecurityAudit(this, name + ".ListUsersByName(" + usernameToMatch + ").", (totalRecords > 0));
             }
             catch (Exception ex)
             {
@@ -239,11 +296,14 @@ namespace WCFProviderProxy.Host
 
         public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".FindUsersByName()");
+
             MembershipUserCollection output = null;
          
             try
             {
                 output = InternalProvider.FindUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords);
+                OnSecurityAudit(this, name + ".FindUsersByName(" + usernameToMatch + ").", (totalRecords > 0));
             }
             catch (Exception ex)
             {
@@ -257,6 +317,8 @@ namespace WCFProviderProxy.Host
 
         public List<MembershipUser> ListAllUsers(int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".ListAllUsers()");
+
             List<MembershipUser> output = new List<MembershipUser>();
 
             try
@@ -265,6 +327,8 @@ namespace WCFProviderProxy.Host
                 {
                     output.Add(user);
                 }
+
+                OnSecurityAudit(this, name + ".ListAllUsers().", (totalRecords > 0));
             }
             catch (Exception ex)
             {
@@ -278,11 +342,14 @@ namespace WCFProviderProxy.Host
 
         public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
         {
+            OnDebug(this, name + ".GetAllUsers()");
+
             MembershipUserCollection output = null;
          
             try
             {
                 output = InternalProvider.GetAllUsers(pageIndex, pageSize, out totalRecords);
+                OnSecurityAudit(this, name + ".GetAllUsers().", (totalRecords > 0));
             }
             catch (Exception ex)
             {
@@ -296,6 +363,8 @@ namespace WCFProviderProxy.Host
 
         public override int GetNumberOfUsersOnline()
         {
+            OnDebug(this, name + ".GetNumberOfUsersOnline()");
+
             int output = 0;
 
             try
@@ -313,11 +382,14 @@ namespace WCFProviderProxy.Host
 
         public override string GetPassword(string username, string answer)
         {
+            OnDebug(this, name + ".GetPassword()");
+
             string output = null;
 
             try
             {
                 output = InternalProvider.GetPassword(username, answer);
+                OnSecurityAudit(this, name + ".GetPassword(" + username + ").", !String.IsNullOrEmpty(output));
             }
             catch (Exception ex)
             {
@@ -330,11 +402,14 @@ namespace WCFProviderProxy.Host
 
         public override MembershipUser GetUser(string username, bool userIsOnline)
         {
+            OnDebug(this, name + ".GetUser()");
+
             MembershipUser output = null;
 
             try
             {
                 output = InternalProvider.GetUser(username, userIsOnline);
+                OnSecurityAudit(this, name + ".GetUser(" + username + ").", (output != null));
             }
             catch (Exception ex)
             {
@@ -347,11 +422,14 @@ namespace WCFProviderProxy.Host
 
         public override MembershipUser GetUser(object providerUserKey, bool userIsOnline)
         {
+            OnDebug(this, name + ".GertUser()");
+
             MembershipUser output = null;
 
             try
             {
                 output = InternalProvider.GetUser(providerUserKey, userIsOnline);
+                OnSecurityAudit(this, name + ".GetUser(" + providerUserKey.ToString() + ").", (output != null));
             }
             catch (Exception ex)
             {
@@ -364,11 +442,14 @@ namespace WCFProviderProxy.Host
 
         public override string GetUserNameByEmail(string email)
         {
+            OnDebug(this, name + ".GetUserNameByEmail()");
+
             string output = null;
 
             try
             {
                 output = InternalProvider.GetUserNameByEmail(email);
+                OnSecurityAudit(this, name + ".GetUserNameByEmail(" + email + ").", !String.IsNullOrEmpty(output));
             }
             catch (Exception ex)
             {
@@ -382,6 +463,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".MaxInvalidPasswordAttempts");
+
                 int output = 0;
 
                 try
@@ -402,6 +485,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".MinRequiredNonAlphanumericCharacters");
+
                 int output = 0;
 
                 try
@@ -422,6 +507,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".MinRequiredPasswordLength");
+
                 int output = 0;
 
                 try
@@ -442,6 +529,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".PasswordAttemptWindow");
+
                 int output = 0;
 
                 try
@@ -462,6 +551,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".PasswordFormat");
+
                 MembershipPasswordFormat output = MembershipPasswordFormat.Clear;
 
                 try
@@ -482,6 +573,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".PasswordStrengthRegularExpression");
+
                 string output = null;
 
                 try
@@ -501,6 +594,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".RequiresQuestionAndAnswer");
+
                 bool output = false;
 
                 try
@@ -521,6 +616,8 @@ namespace WCFProviderProxy.Host
         {
             get
             {
+                OnDebug(this, name + ".RequiresUniqueEmail");
+
                 bool output = false;
 
                 try
@@ -539,11 +636,19 @@ namespace WCFProviderProxy.Host
 
         public override string ResetPassword(string username, string answer)
         {
+            OnDebug(this, name + ".ResetPassword()");
+
             string output = null;
 
             try
             {
                 output = InternalProvider.ResetPassword(username, answer);
+                OnSecurityAudit(this, name + ".ResetPassword(" + username + ").", !String.IsNullOrEmpty(output));
+                
+                if (!String.IsNullOrEmpty(output))
+                {
+                    OnLog(this, name + ": Reset password for user '" + username + "'.");
+                }
             }
             catch (Exception ex)
             {
@@ -555,11 +660,19 @@ namespace WCFProviderProxy.Host
 
         public override bool UnlockUser(string userName)
         {
+            OnDebug(this, name + ".UnlockUser()");
+
             bool output = false;
 
             try
             {
                 output = InternalProvider.UnlockUser(userName);
+                OnSecurityAudit(this, name + ".UnlockUser(" + userName + ").", output);
+                
+                if (output)
+                {
+                    OnLog(this, name + ": Unlocked user '" + userName + "'.");
+                }
             }
             catch (Exception ex)
             {
@@ -572,9 +685,12 @@ namespace WCFProviderProxy.Host
 
         public override void UpdateUser(MembershipUser user)
         {
+            OnDebug(this, name + ".UpdateUser()");
+
             try
             {
                 InternalProvider.UpdateUser(user);
+                OnLog(this, name + ": Updated user '" + user.UserName + "'.");
             }
             catch (Exception ex)
             {
@@ -584,11 +700,14 @@ namespace WCFProviderProxy.Host
 
         public override bool ValidateUser(string username, string password)
         {
+            OnDebug(this, name + ".ValidateUser()");
+
             bool output = false;
 
             try
             {
                 output = InternalProvider.ValidateUser(username, password);
+                OnSecurityAudit(this, name + ".ValidateUser(" + username + ")", output);
             }
             catch (Exception ex)
             {
