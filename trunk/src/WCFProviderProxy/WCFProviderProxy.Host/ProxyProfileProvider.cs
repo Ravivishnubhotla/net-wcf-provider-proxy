@@ -9,7 +9,7 @@ using WCFProviderProxy.Interfaces;
 
 namespace WCFProviderProxy.Host
 {
-    public partial class ProxyProfileProvider: ProfileProvider, IWcfProfileProvider
+    public partial class ProxyProfileProvider : ProfileProvider, IWcfProfileProvider
     {
         private static readonly string name = typeof(ProxyProfileProvider).Name;
         private ProfileProvider InternalProvider = ProfileManager.Provider;
@@ -292,7 +292,7 @@ namespace WCFProviderProxy.Host
             return output;
         }
 
-        public  List<ProfileInfo> ListAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords)
+        public List<ProfileInfo> ListAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords)
         {
             OnDebug(this, name + ".ListAllProfiles()");
 
@@ -385,7 +385,7 @@ namespace WCFProviderProxy.Host
 
                 foreach (WcfSettingsProperty property in collection)
                 {
-                    propertyCollection.Add(property.ToSettingsProperty());
+                    propertyCollection.Add(property.ToSettingsProperty(InternalProvider));
                 }
 
                 foreach (SettingsPropertyValue propertyValue in InternalProvider.GetPropertyValues(context, propertyCollection))
@@ -415,7 +415,7 @@ namespace WCFProviderProxy.Host
             {
                 OnError(this, ex);
             }
-            
+
             return;
         }
 
@@ -429,7 +429,7 @@ namespace WCFProviderProxy.Host
 
                 foreach (WcfSettingsPropertyValue propertyValue in collection)
                 {
-                    propertyValueCollection.Add(propertyValue.ToSettingsPropertyValue());
+                    propertyValueCollection.Add(propertyValue.ToSettingsPropertyValue(InternalProvider));
                 }
 
                 InternalProvider.SetPropertyValues(context, propertyValueCollection);

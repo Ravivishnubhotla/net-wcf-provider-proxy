@@ -60,7 +60,7 @@ namespace WCFProviderProxy.Interfaces
             IsReadOnly = property.IsReadOnly;
             Name = property.Name;
             PropertyTypeName = property.PropertyType.FullName;
-            Provider = property.Provider;
+            //ProviderTypeName = property.Provider.GetType().FullName;
             SerializeAs = property.SerializeAs;
             ThrowOnErrorDeserializing = property.ThrowOnErrorDeserializing;
             ThrowOnErrorSerializing = property.ThrowOnErrorSerializing;
@@ -81,8 +81,8 @@ namespace WCFProviderProxy.Interfaces
         [DataMember]
         public string PropertyTypeName { get; set; }
 
-        [DataMember]
-        public SettingsProvider Provider { get; set; }
+        //[DataMember]
+        //public string ProviderTypeName { get; set; }
 
         [DataMember]
         public SettingsSerializeAs SerializeAs { get; set; }
@@ -93,18 +93,18 @@ namespace WCFProviderProxy.Interfaces
         [DataMember]
         public bool ThrowOnErrorSerializing { get; set; }
 
-        public SettingsProperty ToSettingsProperty()
+        public SettingsProperty ToSettingsProperty(SettingsProvider Provider)
         {
             return new SettingsProperty
             (
-                Name, 
-                System.Type.GetType(PropertyTypeName),
-                Provider, 
-                IsReadOnly, 
-                DefaultValue, 
-                SerializeAs, 
-                Attributes, 
-                ThrowOnErrorDeserializing, 
+                Name,
+                Type.GetType(PropertyTypeName),
+                Provider,
+                IsReadOnly,
+                DefaultValue,
+                SerializeAs,
+                Attributes,
+                ThrowOnErrorDeserializing,
                 ThrowOnErrorSerializing
             );
         }
@@ -139,9 +139,9 @@ namespace WCFProviderProxy.Interfaces
         [DataMember]
         public object SerializedValue { get; set; }
 
-        public SettingsPropertyValue ToSettingsPropertyValue()
+        public SettingsPropertyValue ToSettingsPropertyValue(SettingsProvider Provider)
         {
-            SettingsPropertyValue value = new SettingsPropertyValue(Property.ToSettingsProperty());
+            SettingsPropertyValue value = new SettingsPropertyValue(Property.ToSettingsProperty(Provider));
 
             value.Deserialized = Deserialized;
             value.IsDirty = IsDirty;

@@ -23,8 +23,8 @@ namespace WCFProviderProxy.Web
             if (factory == null)
             {
                 factory = new ChannelFactory<IWcfProfileProvider>("RemoteProfileProvider");
-            } 
-            
+            }
+
             IWcfProfileProvider provider = factory.CreateChannel();
             provider.SetProvider(RemoteProviderName);
             return provider;
@@ -136,7 +136,7 @@ namespace WCFProviderProxy.Web
                 {
                     profileList.Add(profile);
                 }
-                
+
                 output = remoteProvider.DeleteProfiles(profileList);
                 DisposeRemoteProvider(remoteProvider);
                 OnLog(this, name + ": Deleted " + output.ToString() + " profiles.");
@@ -163,7 +163,7 @@ namespace WCFProviderProxy.Web
             try
             {
                 IWcfProfileProvider remoteProvider = RemoteProvider();
-                
+
                 foreach (ProfileInfo profileInfo in remoteProvider.ListInactiveProfilesByUserName(authenticationOption, usernameToMatch, userInactiveSinceDate, pageIndex, pageSize, out totalRecords))
                 {
                     output.Add(profileInfo);
@@ -321,8 +321,10 @@ namespace WCFProviderProxy.Web
 
                 foreach (WcfSettingsPropertyValue propertyValue in remoteProvider.GetPropertyValues(context, properties))
                 {
-                    output.Add(propertyValue.ToSettingsPropertyValue());
+                    output.Add(propertyValue.ToSettingsPropertyValue(this));
                 }
+
+                DisposeRemoteProvider(remoteProvider);
             }
             catch (Exception ex)
             {
