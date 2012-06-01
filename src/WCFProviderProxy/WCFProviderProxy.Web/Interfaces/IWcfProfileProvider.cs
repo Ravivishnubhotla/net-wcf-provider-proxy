@@ -42,10 +42,10 @@ namespace WCFProviderProxy.Interfaces
         int GetNumberOfInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate);
 
         [OperationContract]
-        List<SettingsPropertyValue> GetPropertyValues(SettingsContext context, List<WcfSettingsProperty> collection);
+        List<WcfSettingsPropertyValue> GetPropertyValues(SettingsContext context, List<WcfSettingsProperty> collection);
 
         [OperationContract]
-        void SetPropertyValues(SettingsContext context, List<SettingsPropertyValue> collection);
+        void SetPropertyValues(SettingsContext context, List<WcfSettingsPropertyValue> collection);
     }
 
     [DataContract]
@@ -109,5 +109,46 @@ namespace WCFProviderProxy.Interfaces
             );
         }
     }
-    
+
+    [DataContract]
+    public class WcfSettingsPropertyValue
+    {
+        public WcfSettingsPropertyValue() { }
+
+        public WcfSettingsPropertyValue(SettingsPropertyValue value)
+        {
+            Deserialized = value.Deserialized;
+            IsDirty = value.IsDirty;
+            Property = new WcfSettingsProperty(value.Property);
+            PropertyValue = value.PropertyValue;
+            SerializedValue = value.SerializedValue;
+        }
+
+        [DataMember]
+        public bool Deserialized { get; set; }
+
+        [DataMember]
+        public bool IsDirty { get; set; }
+
+        [DataMember]
+        public WcfSettingsProperty Property { get; set; }
+
+        [DataMember]
+        public object PropertyValue { get; set; }
+
+        [DataMember]
+        public object SerializedValue { get; set; }
+
+        public SettingsPropertyValue ToSettingsPropertyValue()
+        {
+            SettingsPropertyValue value = new SettingsPropertyValue(Property.ToSettingsProperty());
+
+            value.Deserialized = Deserialized;
+            value.IsDirty = IsDirty;
+            value.PropertyValue = PropertyValue;
+            value.SerializedValue = SerializedValue;
+
+            return value;
+        }
+    }
 }
