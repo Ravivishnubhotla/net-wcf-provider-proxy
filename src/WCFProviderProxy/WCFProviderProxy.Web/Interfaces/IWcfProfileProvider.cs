@@ -57,7 +57,7 @@ namespace WCFProviderProxy.Interfaces
             DefaultValue = property.DefaultValue;
             IsReadOnly = property.IsReadOnly;
             Name = property.Name;
-            PropertyType = property.PropertyType;
+            PropertyTypeName = property.PropertyType.FullName;
             Provider = property.Provider;
             SerializeAs = property.SerializeAs;
             ThrowOnErrorDeserializing = property.ThrowOnErrorDeserializing;
@@ -68,7 +68,7 @@ namespace WCFProviderProxy.Interfaces
         public object DefaultValue { get; set; }
         public bool IsReadOnly { get; set; }
         public string Name { get; set; }
-        public Type PropertyType { get; set; }
+        public string PropertyTypeName { get; set; }
         public SettingsProvider Provider { get; set; }
         public SettingsSerializeAs SerializeAs { get; set; }
         public bool ThrowOnErrorDeserializing { get; set; }
@@ -79,7 +79,7 @@ namespace WCFProviderProxy.Interfaces
             return new SettingsProperty
             (
                 Name, 
-                PropertyType, 
+                System.Type.GetType(PropertyTypeName),
                 Provider, 
                 IsReadOnly, 
                 DefaultValue, 
