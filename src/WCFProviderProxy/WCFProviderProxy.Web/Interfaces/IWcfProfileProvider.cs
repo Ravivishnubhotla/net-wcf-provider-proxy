@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Text;
 using System.Web.Profile;
@@ -47,6 +48,7 @@ namespace WCFProviderProxy.Interfaces
         void SetPropertyValues(SettingsContext context, List<SettingsPropertyValue> collection);
     }
 
+    [DataContract]
     public class WcfSettingsProperty
     {
         public WcfSettingsProperty() { }
@@ -64,14 +66,31 @@ namespace WCFProviderProxy.Interfaces
             ThrowOnErrorSerializing = property.ThrowOnErrorSerializing;
         }
 
+        [DataMember]
         public SettingsAttributeDictionary Attributes { get; set; }
+
+        [DataMember]
         public object DefaultValue { get; set; }
+
+        [DataMember]
         public bool IsReadOnly { get; set; }
+
+        [DataMember]
         public string Name { get; set; }
+
+        [DataMember]
         public string PropertyTypeName { get; set; }
+
+        [DataMember]
         public SettingsProvider Provider { get; set; }
+
+        [DataMember]
         public SettingsSerializeAs SerializeAs { get; set; }
+
+        [DataMember]
         public bool ThrowOnErrorDeserializing { get; set; }
+
+        [DataMember]
         public bool ThrowOnErrorSerializing { get; set; }
 
         public SettingsProperty ToSettingsProperty()
