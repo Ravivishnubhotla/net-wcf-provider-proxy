@@ -41,10 +41,54 @@ namespace WCFProviderProxy.Interfaces
         int GetNumberOfInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate);
 
         [OperationContract]
-        List<SettingsPropertyValue> GetPropertyValues(SettingsContext context, List<SettingsProperty> collection);
+        List<SettingsPropertyValue> GetPropertyValues(SettingsContext context, List<WcfSettingsProperty> collection);
 
         [OperationContract]
         void SetPropertyValues(SettingsContext context, List<SettingsPropertyValue> collection);
+    }
+
+    public class WcfSettingsProperty
+    {
+        public WcfSettingsProperty() { }
+
+        public WcfSettingsProperty(SettingsProperty property)
+        {
+            Attributes = property.Attributes;
+            DefaultValue = property.DefaultValue;
+            IsReadOnly = property.IsReadOnly;
+            Name = property.Name;
+            PropertyType = property.PropertyType;
+            Provider = property.Provider;
+            SerializeAs = property.SerializeAs;
+            ThrowOnErrorDeserializing = property.ThrowOnErrorDeserializing;
+            ThrowOnErrorSerializing = property.ThrowOnErrorSerializing;
+        }
+
+        public SettingsAttributeDictionary Attributes { get; set; }
+        public object DefaultValue { get; set; }
+        public bool IsReadOnly { get; set; }
+        public string Name { get; set; }
+        public Type PropertyType { get; set; }
+        public SettingsProvider Provider { get; set; }
+        public SettingsSerializeAs SerializeAs { get; set; }
+        public bool ThrowOnErrorDeserializing { get; set; }
+        public bool ThrowOnErrorSerializing { get; set; }
+
+        public SettingsProperty ToSettingsProperty()
+        {
+            return new SettingsProperty
+            (
+                Name, 
+                PropertyType, 
+                Provider, 
+                IsReadOnly, 
+                DefaultValue, 
+                SerializeAs, 
+                Attributes, 
+                ThrowOnErrorDeserializing, 
+                ThrowOnErrorSerializing
+            );
+        }
     }
     
 }

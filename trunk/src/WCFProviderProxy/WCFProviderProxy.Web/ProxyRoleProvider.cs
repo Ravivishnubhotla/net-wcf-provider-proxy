@@ -12,12 +12,17 @@ namespace WCFProviderProxy.Web
     public partial class ProxyRoleProvider : RoleProvider
     {
         private static readonly string name = typeof(ProxyRoleProvider).Name;
-        private static readonly ChannelFactory<IWcfRoleProvider> factory = new ChannelFactory<IWcfRoleProvider>("RemoteRoleProvider");
+        private static ChannelFactory<IWcfRoleProvider> factory = null;
 
         private string RemoteProviderName = "";
         private IWcfRoleProvider RemoteProvider()
         {
             OnDebug(this, name + ".RemoteProvider()");
+
+            if (factory == null)
+            {
+                factory = new ChannelFactory<IWcfRoleProvider>("RemoteRoleProvider");
+            }
 
             IWcfRoleProvider provider = factory.CreateChannel();
             provider.SetProvider(RemoteProviderName);

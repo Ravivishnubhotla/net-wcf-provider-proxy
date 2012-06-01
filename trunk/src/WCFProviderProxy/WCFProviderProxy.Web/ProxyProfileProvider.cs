@@ -13,13 +13,18 @@ namespace WCFProviderProxy.Web
     public partial class ProxyProfileProvider : ProfileProvider
     {
         private static readonly string name = typeof(ProxyProfileProvider).Name;
-        private static readonly ChannelFactory<IWcfProfileProvider> factory = new ChannelFactory<IWcfProfileProvider>("ProfileRoleProvider");
+        private static ChannelFactory<IWcfProfileProvider> factory = null;
 
         private string RemoteProviderName = "";
         private IWcfProfileProvider RemoteProvider()
         {
             OnDebug(this, name + ".RemoteProvider()");
 
+            if (factory == null)
+            {
+                factory = new ChannelFactory<IWcfProfileProvider>("RemoteProfileProvider");
+            } 
+            
             IWcfProfileProvider provider = factory.CreateChannel();
             provider.SetProvider(RemoteProviderName);
             return provider;
@@ -307,13 +312,12 @@ namespace WCFProviderProxy.Web
             try
             {
                 IWcfProfileProvider remoteProvider = RemoteProvider();
-                List<SettingsProperty> properties = new List<SettingsProperty>();
+                List<WcfSettingsProperty> properties = new List<WcfSettingsProperty>();
 
                 foreach (SettingsProperty property in collection)
                 {
-                    properties.Add(property);
+                    properties.Add(new WcfSettingsProperty(property));
                 }
-
 
                 foreach (SettingsPropertyValue propertyValue in remoteProvider.GetPropertyValues(context, properties))
                 {

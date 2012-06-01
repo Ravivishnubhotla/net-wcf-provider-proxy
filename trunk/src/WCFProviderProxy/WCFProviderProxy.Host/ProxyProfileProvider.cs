@@ -373,7 +373,7 @@ namespace WCFProviderProxy.Host
             return output;
         }
 
-        public List<SettingsPropertyValue> GetPropertyValues(SettingsContext context, List<SettingsProperty> collection)
+        public List<SettingsPropertyValue> GetPropertyValues(SettingsContext context, List<WcfSettingsProperty> collection)
         {
             OnDebug(this, name + ".GetPropertyValues()");
 
@@ -383,9 +383,9 @@ namespace WCFProviderProxy.Host
             {
                 SettingsPropertyCollection propertyCollection = new SettingsPropertyCollection();
 
-                foreach (SettingsProperty property in collection)
+                foreach (WcfSettingsProperty property in collection)
                 {
-                    propertyCollection.Add(property);
+                    propertyCollection.Add(property.ToSettingsProperty());
                 }
 
                 foreach (SettingsPropertyValue propertyValue in InternalProvider.GetPropertyValues(context, propertyCollection))

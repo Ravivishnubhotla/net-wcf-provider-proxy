@@ -12,12 +12,17 @@ namespace WCFProviderProxy.Web
     public partial class ProxyMembershipProvider : MembershipProvider
     {
         private static readonly string name = typeof(ProxyMembershipProvider).Name;
-        private static readonly ChannelFactory<IWcfMembershipProvider> factory = new ChannelFactory<IWcfMembershipProvider>("RemoteMembershipProvider");
+        private static ChannelFactory<IWcfMembershipProvider> factory = null;
 
         private string RemoteProviderName = "";
         private IWcfMembershipProvider RemoteProvider()
         {
             OnDebug(this, name + ".RemoteProvider()");
+
+            if (factory == null)
+            {
+                factory = new ChannelFactory<IWcfMembershipProvider>("RemoteMembershipProvider");
+            }
 
             IWcfMembershipProvider provider = factory.CreateChannel();
             provider.SetProvider(RemoteProviderName);
