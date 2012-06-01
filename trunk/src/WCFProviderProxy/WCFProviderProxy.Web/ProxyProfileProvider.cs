@@ -319,9 +319,9 @@ namespace WCFProviderProxy.Web
                     properties.Add(new WcfSettingsProperty(property));
                 }
 
-                foreach (SettingsPropertyValue propertyValue in remoteProvider.GetPropertyValues(context, properties))
+                foreach (WcfSettingsPropertyValue propertyValue in remoteProvider.GetPropertyValues(context, properties))
                 {
-                    output.Add(propertyValue);
+                    output.Add(propertyValue.ToSettingsPropertyValue());
                 }
             }
             catch (Exception ex)
@@ -344,11 +344,11 @@ namespace WCFProviderProxy.Web
             try
             {
                 IWcfProfileProvider remoteProvider = RemoteProvider();
-                List<SettingsPropertyValue> propertyValues = new List<SettingsPropertyValue>();
+                List<WcfSettingsPropertyValue> propertyValues = new List<WcfSettingsPropertyValue>();
 
                 foreach (SettingsPropertyValue propertyValue in collection)
                 {
-                    propertyValues.Add(propertyValue);
+                    propertyValues.Add(new WcfSettingsPropertyValue(propertyValue));
                 }
 
                 remoteProvider.SetPropertyValues(context, propertyValues);
