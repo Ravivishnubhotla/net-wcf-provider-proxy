@@ -6,6 +6,14 @@ using System.Text;
 
 namespace WCFProviderProxy.Interfaces
 {
+    /// <summary>
+    /// The service contract for communicating between the
+    /// client and host profile provider proxy over WCF.
+    /// </summary>
+    /// <remarks>
+    /// These were left as close as possible to the actual 
+    /// RoleProvider abstract class signature.
+    /// </remarks>
     [ServiceContract]
     public interface IWcfRoleProvider
     {

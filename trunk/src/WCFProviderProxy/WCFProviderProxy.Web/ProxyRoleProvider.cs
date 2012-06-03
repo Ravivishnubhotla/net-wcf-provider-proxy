@@ -7,7 +7,7 @@ using System.Text;
 using System.Web.Security;
 using WCFProviderProxy.Interfaces;
 
-namespace WCFProviderProxy.Web
+namespace WCFProviderProxy
 {
     public partial class ProxyRoleProvider : RoleProvider
     {

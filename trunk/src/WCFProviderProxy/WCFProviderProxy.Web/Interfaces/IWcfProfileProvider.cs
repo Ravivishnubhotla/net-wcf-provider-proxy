@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
-using System.Text;
 using System.Web.Profile;
 
 namespace WCFProviderProxy.Interfaces
 {
+    /// <summary>
+    /// The service contract for communicating between the
+    /// client and host profile provider proxy over WCF.
+    /// </summary>
+    /// <remarks>
+    /// These were left as close as possible to the actual 
+    /// ProfileProvider abstract class signature.
+    /// </remarks>
     [ServiceContract]
     public interface IWcfProfileProvider
     {
@@ -48,6 +54,20 @@ namespace WCFProviderProxy.Interfaces
         void SetPropertyValues(SettingsContext context, List<WcfSettingsPropertyValue> collection);
     }
 
+    /// <summary>
+    /// This contains the serialization information passed into
+    /// IWcfProfileProvider.GetPropertyValues method as well as
+    /// contained in the WcfSettingsPropertyValue.Property.
+    /// </summary>
+    /// <remarks>
+    /// The SettingsProperty class itself is not serializable
+    /// due to the Provider property and PropertyType property
+    /// along with lack of an empty constructor.
+    /// 
+    /// The method ToSettingsProperty should be passed a locally
+    /// accessible SettingsProvider for proper conversion back
+    /// to a standard SettingsProperty.
+    /// </remarks>
     [DataContract]
     public class WcfSettingsProperty
     {
@@ -60,7 +80,6 @@ namespace WCFProviderProxy.Interfaces
             IsReadOnly = property.IsReadOnly;
             Name = property.Name;
             PropertyTypeName = property.PropertyType.FullName;
-            //ProviderTypeName = property.Provider.GetType().FullName;
             SerializeAs = property.SerializeAs;
             ThrowOnErrorDeserializing = property.ThrowOnErrorDeserializing;
             ThrowOnErrorSerializing = property.ThrowOnErrorSerializing;
@@ -80,9 +99,6 @@ namespace WCFProviderProxy.Interfaces
 
         [DataMember]
         public string PropertyTypeName { get; set; }
-
-        //[DataMember]
-        //public string ProviderTypeName { get; set; }
 
         [DataMember]
         public SettingsSerializeAs SerializeAs { get; set; }
@@ -110,6 +126,20 @@ namespace WCFProviderProxy.Interfaces
         }
     }
 
+    /// <summary>
+    /// This contains the serialization information passed into
+    /// IWcfProfileProvider.SetPropertyValues method as well as
+    /// returned from teh IWcfProfileProvider.GetPropertyValues
+    /// </summary>
+    /// <remarks>
+    /// The SettingsPropertyValue class itself is not serializable
+    /// due to the Property property along with lack of an empty 
+    /// constructor.
+    /// 
+    /// The method ToSettingsValueProperty should be passed a 
+    /// locally accessible SettingsProvider for proper conversion 
+    /// of the Property property back to a standard SettingsProperty.
+    /// </remarks>
     [DataContract]
     public class WcfSettingsPropertyValue
     {

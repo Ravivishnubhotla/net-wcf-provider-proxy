@@ -4,7 +4,7 @@ using System.Linq;
 using System.ServiceModel;
 using System.Text;
 
-namespace WCFProviderProxy.Host
+namespace WCFProviderProxy.Server
 {
     public partial class ProxyMembershipProvider
     {

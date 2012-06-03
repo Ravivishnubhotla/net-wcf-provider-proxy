@@ -6,7 +6,7 @@ using System.Web.Configuration;
 using System.Web.Security;
 using WCFProviderProxy.Interfaces;
 
-namespace WCFProviderProxy.Host
+namespace WCFProviderProxy.Server
 {
     public partial class ProxyMembershipProvider : MembershipProvider, IWcfMembershipProvider
     {
@@ -65,7 +65,6 @@ namespace WCFProviderProxy.Host
                     SetProvider(config["proxyProviderName"]);
                 }
 
-                // Initialize the abstract base class.
                 base.Initialize(name, config);
 
                 OnLog(this, name + ": Initialized.");

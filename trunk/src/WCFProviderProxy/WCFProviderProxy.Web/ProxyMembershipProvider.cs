@@ -7,7 +7,7 @@ using System.Text;
 using System.Web.Security;
 using WCFProviderProxy.Interfaces;
 
-namespace WCFProviderProxy.Web
+namespace WCFProviderProxy
 {
     public partial class ProxyMembershipProvider : MembershipProvider
     {
@@ -15,13 +15,24 @@ namespace WCFProviderProxy.Web
         private static ChannelFactory<IWcfMembershipProvider> factory = null;
 
         private string RemoteProviderName = "";
+
+        /// <summary>
+        /// After the caller has completed its work with the object,
+        /// it should then pass the object to DisposeProvider to close
+        /// the connection.
+        /// </summary>
         private IWcfMembershipProvider RemoteProvider()
         {
             OnDebug(this, name + ".RemoteProvider()");
 
+
+            // TODO: Implement error checking and possibly allow
+            // for alternate binding to enable higher reliability.
             if (factory == null)
             {
                 factory = new ChannelFactory<IWcfMembershipProvider>("RemoteMembershipProvider");
+                // TODO: Attach event handlers to pass events to OnDebug,
+                // OnLog, and OnError as appropriate.
             }
 
             IWcfMembershipProvider provider = factory.CreateChannel();
@@ -30,10 +41,15 @@ namespace WCFProviderProxy.Web
             return provider;
         }
 
+        /// <summary>
+        /// This method should be called to handle closing the 
+        /// connected proxy object.
+        /// </summary>
         private void DisposeRemoteProvider(IWcfMembershipProvider RemoteProvider)
         {
             OnDebug(this, name + ".DisposeRemoteProvider()");
 
+            // TODO: Add error checking for state of object.
             ((IClientChannel)RemoteProvider).Dispose();
         }
 
@@ -52,7 +68,6 @@ namespace WCFProviderProxy.Web
                     OnDebug(this, name + ": RemoteProviderName = '" + RemoteProviderName + "'");
                 }
 
-                // Initialize the abstract base class.
                 base.Initialize(name, config);
 
                 OnLog(this, name + ": Initialized.");
@@ -259,6 +274,9 @@ namespace WCFProviderProxy.Web
             {
                 IWcfMembershipProvider remoteProvider = RemoteProvider();
 
+                // We can not serialize a MembershipUserCollection so the proxy
+                // interface provides a list of serialized MembershipUser objects
+                // which we rebuild a MembershipUserCollection object with.
                 foreach (MembershipUser user in remoteProvider.ListUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords))
                 {
                     output.Add(user);
@@ -274,6 +292,9 @@ namespace WCFProviderProxy.Web
                     throw;
                 }
 
+                // Rather than return a possible partial list, the returned 
+                // MembershipUserCollection is cleared of all entries and the 
+                // totalRecords output parameter is set to 0.
                 output.Clear();
                 totalRecords = 0;
             }
@@ -291,6 +312,9 @@ namespace WCFProviderProxy.Web
             {
                 IWcfMembershipProvider remoteProvider = RemoteProvider();
 
+                // We can not serialize a MembershipUserCollection so the proxy
+                // interface provides a list of serialized MembershipUser objects
+                // which we rebuild a MembershipUserCollection object with.
                 foreach (MembershipUser user in remoteProvider.ListUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords))
                 {
                     output.Add(user);
@@ -306,6 +330,9 @@ namespace WCFProviderProxy.Web
                     throw;
                 }
 
+                // Rather than return a possible partial list, the returned 
+                // MembershipUserCollection is cleared of all entries and the 
+                // totalRecords output parameter is set to 0.
                 output.Clear();
                 totalRecords = 0;
             }
@@ -323,6 +350,9 @@ namespace WCFProviderProxy.Web
             {
                 IWcfMembershipProvider remoteProvider = RemoteProvider();
 
+                // We can not serialize a MembershipUserCollection so the proxy
+                // interface provides a list of serialized MembershipUser objects
+                // which we rebuild a MembershipUserCollection object with.
                 foreach (MembershipUser user in remoteProvider.ListAllUsers(pageIndex, pageSize, out totalRecords))
                 {
                     output.Add(user);
@@ -338,6 +368,9 @@ namespace WCFProviderProxy.Web
                     throw;
                 }
 
+                // Rather than return a possible partial list, the returned 
+                // MembershipUserCollection is cleared of all entries and the 
+                // totalRecords output parameter is set to 0.
                 output.Clear();
                 totalRecords = 0;
             }
