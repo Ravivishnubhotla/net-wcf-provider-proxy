@@ -9,7 +9,7 @@ namespace WCFProviderProxy.Server
 {
     class Service
     {
-        static readonly string eventSource = new ProxyService().ServiceName;
+        static string eventSource = "";
         static readonly string eventLog = "Application";
 
         static void Main()
@@ -51,6 +51,9 @@ namespace WCFProviderProxy.Server
             {
                 // If running as a windows service, attach event handlers
                 // to log all events to the windows application log.
+
+                eventSource = membershipService.ServiceName;
+
                 if (!EventLog.SourceExists(eventSource))
                 {
                     EventLog.CreateEventSource(eventSource, eventLog);
@@ -125,7 +128,7 @@ namespace WCFProviderProxy.Server
     /// methods to be called externally in a non-windows 
     /// service hosted code.
     /// </summary>
-    abstract class ProxyService : ServiceBase
+    public abstract class ProxyService : ServiceBase
     {
         public void StartService() { this.OnStart(null); }
         public void StopService() { this.OnStop(); }
