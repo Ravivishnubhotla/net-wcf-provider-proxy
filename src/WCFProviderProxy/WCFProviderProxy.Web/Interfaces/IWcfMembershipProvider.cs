@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.ServiceModel;
-using System.Text;
 using System.Web.Security;
 
 namespace WCFProviderProxy.Interfaces
 {
+    /// <summary>
+    /// The service contract for communicating between the
+    /// client and host membership provider proxy over WCF.
+    /// </summary>
+    /// <remarks>
+    /// These were left as close as possible to the actual 
+    /// MembershipProvider abstract class signature.
+    /// </remarks>
     [ServiceContract]
     public interface IWcfMembershipProvider
     {

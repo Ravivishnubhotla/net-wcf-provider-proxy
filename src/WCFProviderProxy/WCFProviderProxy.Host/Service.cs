@@ -3,9 +3,9 @@ using System.ComponentModel;
 using System.Configuration.Install;
 using System.Diagnostics;
 using System.ServiceProcess;
-using WCFProviderProxy.Web;
+using WCFProviderProxy;
 
-namespace WCFProviderProxy.Host
+namespace WCFProviderProxy.Server
 {
     class Service
     {
@@ -20,7 +20,8 @@ namespace WCFProviderProxy.Host
 
             if (Environment.UserInteractive)
             {
-
+                // If running in console mode, attach event handlers to 
+                // display any errors to the console.
                 ProxyMembershipProvider.SecurityAudit += new ProxySecurityEventHandler(ProxyProvider_ConsoleAudit);
 
                 ProxyMembershipProvider.Debug += new ProxyEventHandler(ProxyProvider_ConsoleInfo);
@@ -48,6 +49,8 @@ namespace WCFProviderProxy.Host
             }
             else
             {
+                // If running as a windows service, attach event handlers
+                // to log all events to the windows application log.
                 if (!EventLog.SourceExists(eventSource))
                 {
                     EventLog.CreateEventSource(eventSource, eventLog);
@@ -116,7 +119,13 @@ namespace WCFProviderProxy.Host
         }
     }
 
-    public class ProxyService : ServiceBase
+    /// <summary>
+    /// The abstract class extends the base ServiceBase
+    /// to add methods allowing the service start and stop 
+    /// methods to be called externally in a non-windows 
+    /// service hosted code.
+    /// </summary>
+    abstract class ProxyService : ServiceBase
     {
         public void StartService() { this.OnStart(null); }
         public void StopService() { this.OnStop(); }
@@ -159,8 +168,6 @@ namespace WCFProviderProxy.Host
         }
     }
 
-
-#if INSTALLER
     [RunInstaller(true)]
     public class ServiceInstaller : Installer
     {
@@ -189,7 +196,5 @@ namespace WCFProviderProxy.Host
 
             Installers.AddRange(new Installer[] { processInstaller, serviceInstaller});
         }
-
     }
-#endif
 }

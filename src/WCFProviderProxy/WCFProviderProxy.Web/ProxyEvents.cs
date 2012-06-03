@@ -1,13 +1,19 @@
 ﻿using System;
 
-namespace WCFProviderProxy.Web
+namespace WCFProviderProxy
 {
+    /// <summary>
+    /// Event argument class for Debug, Log, and Error events.
+    /// </summary>
     public class ProxyEventArgs : EventArgs
     {
         public string Message { get; set; }
         public Exception Exception { get; set; }
     }
 
+    /// <summary>
+    /// Event argument class for Audit events.
+    /// </summary>
     public class ProxySecurityEventArgs : EventArgs
     {
         public string Message { get; set; }
@@ -26,7 +32,7 @@ namespace WCFProviderProxy.Web
         public static event ProxyEventHandler Log;
 
         // Called for all captured errors.
-        // If no handlers and error is not recoverable, error will be re-thrown.
+        // If no handlers and error is not recoverable, error may be re-thrown.
         public static event ProxyEventHandler Error;
 
         // Called for all potential security events along with success flag.
@@ -49,6 +55,11 @@ namespace WCFProviderProxy.Web
             }
         }
 
+        // The OnError event will return a boolean value indicating if their 
+        // was an attached delegate. This is to allow suppression of recoverable 
+        // errors if they are handled externally. This should be modified to
+        // allow the delegate to pass back a boolean value of whether the 
+        // error should be suppressed to allow greater consumer control.
         protected static bool OnError(object sender, Exception ex)
         {
             bool output = false;
@@ -99,6 +110,11 @@ namespace WCFProviderProxy.Web
             }
         }
 
+        // The OnError event will return a boolean value indicating if their 
+        // was an attached delegate. This is to allow suppression of recoverable 
+        // errors if they are handled externally. This should be modified to
+        // allow the delegate to pass back a boolean value of whether the 
+        // error should be suppressed to allow greater consumer control.
         protected static bool OnError(object sender, Exception ex)
         {
             bool output = false;
@@ -141,6 +157,11 @@ namespace WCFProviderProxy.Web
             }
         }
 
+        // The OnError event will return a boolean value indicating if their 
+        // was an attached delegate. This is to allow suppression of recoverable 
+        // errors if they are handled externally. This should be modified to
+        // allow the delegate to pass back a boolean value of whether the 
+        // error should be suppressed to allow greater consumer control.
         protected static bool OnError(object sender, Exception ex)
         {
             bool output = false;

@@ -7,7 +7,7 @@ using System.Web.Configuration;
 using System.Web.Profile;
 using WCFProviderProxy.Interfaces;
 
-namespace WCFProviderProxy.Host
+namespace WCFProviderProxy.Server
 {
     public partial class ProxyProfileProvider : ProfileProvider, IWcfProfileProvider
     {

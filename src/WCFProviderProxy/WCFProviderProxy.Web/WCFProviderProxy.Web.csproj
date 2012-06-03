@@ -8,8 +8,8 @@
     <ProjectGuid>{9E6FDB2C-3BA1-4965-BEFC-EA47BB8F1BF1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WCFProviderProxy.Web</RootNamespace>
-    <AssemblyName>WCFProviderProxy.Web</AssemblyName>
+    <RootNamespace>WCFProviderProxy.Client</RootNamespace>
+    <AssemblyName>WCFProviderProxy.Client</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -33,16 +33,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.ApplicationServices" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ProxyEvents.cs" />

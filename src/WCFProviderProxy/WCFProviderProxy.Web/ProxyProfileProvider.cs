@@ -8,7 +8,7 @@ using System.Text;
 using System.Web.Profile;
 using WCFProviderProxy.Interfaces;
 
-namespace WCFProviderProxy.Web
+namespace WCFProviderProxy
 {
     public partial class ProxyProfileProvider : ProfileProvider
     {
